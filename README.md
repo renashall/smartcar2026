@@ -19,6 +19,27 @@
 
 > If you meet any difficulties, please contact our support team for help.
 
+### Raspberry Pi Setup
+
+After downloading this repository on your Raspberry Pi, open a terminal in the project folder and run the setup scripts in order.
+
+```sh
+cd smartcar2026
+chmod +x setupPart1.sh setupPart2.sh
+./setupPart1.sh
+```
+
+`setupPart1.sh` enables the required Raspberry Pi interfaces, checks the Python command, installs basic I2C support, and applies the Bullseye patch. The script will ask about your Raspberry Pi model and Raspberry Pi OS image date, then prompt you to reboot.
+
+After the Raspberry Pi reboots, return to the project folder and run the second setup script:
+
+```sh
+cd smartcar2026
+./setupPart2.sh
+```
+
+`setupPart2.sh` updates the Raspberry Pi boot configuration for the camera, applies the audio workaround needed by older Raspberry Pi models, installs the car libraries from the `Code` folder, and then prompts you to reboot again.
+
 ### Support
 
 Freenove provides free and quick customer support. Including but not limited to:
