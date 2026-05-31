@@ -2,6 +2,8 @@
 
 > A 4WD smart car kit for Raspberry Pi.
 
+> AI Code Academy has appended this repository for the "Machine Learning with Raspberry Pi Smart Car" course. The original Freenove project files are still present, and the course-specific lesson code lives in `Code/User`.
+
 <img src='Picture/icon.png' width='30%'/>
 
 ### Download
@@ -39,6 +41,41 @@ cd smartcar2026
 ```
 
 `setupPart2.sh` updates the Raspberry Pi boot configuration for the camera, applies the audio workaround needed by older Raspberry Pi models, installs the car libraries from the `Code` folder, and then prompts you to reboot again.
+
+### Where to Put Your Code
+
+Create your own course and experiment files in:
+
+```text
+smartcar2026/Code/User
+```
+
+This keeps your work separate from the Freenove `Code/Server`, `Code/Client`, and `Code/Modules` files.
+
+When a script in `Code/User` needs to import the car modules, put this line at the top of the script before other car imports:
+
+```python
+import car_setup
+```
+
+Then import the car code normally. For example:
+
+```python
+import car_setup
+
+from Motor import Motor
+from Led import Led
+from Command import COMMAND
+```
+
+`Code/User/car_setup.py` adds the project `Code/Server`, `Code/Client`, and `Code/Modules` folders to Python's import path. Keep `car_setup.py` in `Code/User`; you do not need to copy it into each lesson file.
+
+To run one of your scripts from the Raspberry Pi, open a terminal in the `Code/User` folder and run it with Python 3:
+
+```sh
+cd smartcar2026/Code/User
+python3 your_script.py
+```
 
 ### Support
 
