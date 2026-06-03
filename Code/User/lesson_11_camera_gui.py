@@ -1,4 +1,4 @@
-"""Bonus Lesson: Camera GUI.
+"""Lesson 11: Camera GUI (Bonus).
 
 Run this on your Windows or macOS computer while the Raspberry Pi runs the
 smartcar2026 server (`sudo python3 main.py`).
@@ -138,7 +138,7 @@ class CameraWindow(QtWidgets.QMainWindow):
     def __init__(self):
         # Let PyQt set up the basic window first.
         super().__init__()
-        self.setWindowTitle("Bonus Lesson - Camera GUI")
+        self.setWindowTitle("Lesson 11 - Camera GUI (Bonus)")
 
         # The label that the video picture is drawn onto.
         self.video_label = QtWidgets.QLabel("Not connected")
