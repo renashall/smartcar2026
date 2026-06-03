@@ -1,8 +1,9 @@
-"""Lesson 6 (computer side): show the video coming from the Pi camera.
+"""Lesson 6 (viewer side): show the video coming from the Pi camera.
 
-Run this on your Windows or macOS computer.
-First start lesson_6_pi_camera_stream_server.py on the Raspberry Pi, then run
-this and pass the Pi's IP address, for example:
+Run this on the Raspberry Pi itself, or on a separate Windows, macOS, or Linux
+computer that connects to the Pi over Wi-Fi. First start
+lesson_6_pi_camera_stream_server.py on the Raspberry Pi, then run this and pass
+the Pi's IP address (use 127.0.0.1 if you run it on the Pi itself), for example:
 
     python lesson_6_client_video_receiver.py 192.168.1.50
 
