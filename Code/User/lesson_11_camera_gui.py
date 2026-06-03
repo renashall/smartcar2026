@@ -1,7 +1,9 @@
 """Lesson 11: Camera GUI (Bonus).
 
-Run this on your Windows or macOS computer while the Raspberry Pi runs the
-smartcar2026 server (`sudo python3 main.py`).
+Run this on the Raspberry Pi itself, or on a separate Windows, macOS, or Linux
+computer that connects to the Pi over Wi-Fi, while the Raspberry Pi runs the
+smartcar2026 server (`sudo python3 main.py`). Type the Pi's IP address into the
+box (use 127.0.0.1 if you run it on the Pi itself).
 
 The window shows the live camera, lets you move the head with buttons and
 sliders, and has a checkbox to turn face tracking on and off.

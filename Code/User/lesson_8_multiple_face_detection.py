@@ -1,14 +1,17 @@
 """Lesson 8: Multiple Face Detection.
 
-Run this on your Windows or macOS computer. Start the smartcar2026 server on the
-Pi first with `sudo python3 main.py`, then run:
+You can run this on the Raspberry Pi itself, or on a separate Windows, macOS, or
+Linux computer that connects to the Pi over Wi-Fi. Start the smartcar2026 server
+on the Pi first with `sudo python3 main.py`, then run (use 127.0.0.1 as the
+address if you run it on the Pi itself):
 
     python lesson_8_multiple_face_detection.py 192.168.1.50
 
 Lesson 7 already knows how to connect to the Pi, read a picture, find faces, and
-turn the head. This lesson IMPORTS Lesson 7 and reuses all of that, then adds one
-new idea: instead of only the biggest face, draw a box around EVERY face and put
-a yellow circle around the biggest one (the "target" the head follows).
+turn the head. This lesson IMPORTS Lesson 7 and reuses all of that, then adds a
+new multi-face idea: target lock. The first target is the biggest face, but after
+that the program tries to keep following the face nearest to the previous target.
+This makes tracking less jumpy when two people are in view.
 
 (Importing Lesson 7 also runs its `import car_setup`, so the car's code folders
 are ready for us too. Keep this file in the same folder as Lesson 7.)
@@ -26,37 +29,84 @@ import cv2                # OpenCV: we use it here just to draw on the picture
 import lesson_7_face_tracking as face
 
 WINDOW_NAME = "Lesson 8 - Multiple Face Detection"
+BOX_COLOR = (0, 255, 0)          # green
+TARGET_COLOR = (0, 255, 255)    # yellow
+LOCK_DISTANCE = 85               # pixels: how far the target can move and stay locked
 
 
-def draw_faces(frame, faces, target):
-    """Draw a green box on every face and a yellow circle on the biggest one."""
-    # Loop over every face the detector found and draw a green box around it.
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+def face_center(face_box):
+    """Return the middle point of a face box."""
+    x, y, w, h = face_box
+    return int(x + w / 2), int(y + h / 2)
 
-    # The "target" is the biggest face. If we found one, highlight it.
+
+def center_distance(first_face, second_face):
+    """Return the distance between two face centers."""
+    first_x, first_y = face_center(first_face)
+    second_x, second_y = face_center(second_face)
+    return ((first_x - second_x) ** 2 + (first_y - second_y) ** 2) ** 0.5
+
+
+def choose_target(faces, previous_target):
+    """Choose one face to follow, using the previous target when possible."""
+    if len(faces) == 0:
+        return None, "none"
+
+    # When there is no previous target, start with the biggest face. The biggest
+    # face is usually the closest person.
+    if previous_target is None:
+        return face.biggest_face(faces), "largest"
+
+    # After we have a target, choose the new box closest to where that target was
+    # in the last frame. This gives the program a simple memory.
+    closest_face = min(faces, key=lambda face_box: center_distance(face_box, previous_target))
+    if center_distance(closest_face, previous_target) <= LOCK_DISTANCE:
+        return closest_face, "locked"
+
+    # If no detected face is close enough, start over with the biggest face.
+    return face.biggest_face(faces), "largest"
+
+
+def draw_faces(frame, faces, target, target_mode):
+    """Draw every face and highlight the target face."""
+    for face_box in faces:
+        x, y, w, h = face_box
+        cv2.rectangle(frame, (x, y), (x + w, y + h), BOX_COLOR, 2)
+
+    # The target is the one face the car follows. It may be the largest face, or
+    # it may be the face closest to the previous target.
     if target is not None:
         x, y, w, h = target
-        center = (int(x + w / 2), int(y + h / 2))     # middle point of the face
-        # A yellow circle (0, 255, 255 = no blue, full green, full red) drawn
-        # roughly the size of the face.
-        cv2.circle(frame, center, int((w + h) / 4), (0, 255, 255), 2)
-        # Write the word "biggest" just above the box. max(20, y - 8) keeps the
-        # text on screen even when the face is near the very top.
-        cv2.putText(frame, "biggest", (x, max(20, y - 8)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
+        center = face_center(target)     # middle point of the face
+        cv2.circle(frame, center, int((w + h) / 4), TARGET_COLOR, 2)
+        cv2.putText(frame, "target: " + target_mode,
+                    (x, min(frame.shape[0] - 10, y + h + 18)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, TARGET_COLOR, 1, cv2.LINE_AA)
+
+
+def draw_detection_summary(frame, faces, target, target_mode):
+    """Show a short summary for this video frame."""
+    if target is None:
+        summary = "faces: 0  target: none"
+    else:
+        summary = "faces: " + str(len(faces)) + "  target: " + target_mode
+    cv2.putText(frame, summary, (10, 22),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, TARGET_COLOR, 2, cv2.LINE_AA)
 
 
 def loop():
-    """Read pictures, mark all faces, follow the biggest, and show the video."""
+    """Read pictures, mark all faces, keep a target lock, and show the video."""
+    previous_target = None
     while True:
         frame = face.read_frame()           # from Lesson 7: get one picture
         if frame is None:
             break
         faces = face.detect_faces(frame)    # from Lesson 7: find EVERY face
-        target = face.biggest_face(faces)   # from Lesson 7: pick the biggest one
-        draw_faces(frame, faces, target)    # new in Lesson 8: draw them all
-        face.track_face(target)             # from Lesson 7: follow the biggest
+        target, target_mode = choose_target(faces, previous_target)
+        previous_target = target
+        draw_faces(frame, faces, target, target_mode)
+        draw_detection_summary(frame, faces, target, target_mode)
+        face.track_face(target)             # from Lesson 7: turn toward the target
         cv2.imshow(WINDOW_NAME, frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
