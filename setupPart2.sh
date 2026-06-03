@@ -149,6 +149,33 @@ install_car_libraries() {
   )
 }
 
+install_course_python_packages() {
+  echo
+  echo "Installing the Python packages used in the lessons..."
+  echo "(NumPy, OpenCV, Pillow, PyQt5, and the Pi camera library.)"
+
+  sudo apt-get update || true
+
+  # Prefer apt on the Pi: these prebuilt packages install far faster and more
+  # reliably than building wheels with pip. Each one is installed on its own so
+  # a single missing package never blocks the rest.
+  for pkg in python3-numpy python3-opencv python3-pil python3-pyqt5 python3-picamera; do
+    echo "  - $pkg"
+    sudo apt-get install -y "$pkg" || echo "    (could not install $pkg with apt; continuing)"
+  done
+
+  # Fallback: install anything still missing from requirements.txt with pip.
+  req_file="$PACKAGE_DIR/requirements.txt"
+  if [ -f "$req_file" ]; then
+    echo "Checking requirements.txt with pip for anything still missing..."
+    sudo pip3 install -r "$req_file" 2>/dev/null \
+      || sudo pip3 install --break-system-packages -r "$req_file" 2>/dev/null \
+      || echo "pip step skipped; the apt packages above are normally enough."
+  fi
+
+  echo "Lesson Python packages are ready."
+}
+
 find_package_dir
 ask_pi_model
 ask_os_date
@@ -164,6 +191,7 @@ backup_config_file
 edit_camera_config
 disable_audio_for_older_pi_models
 install_car_libraries
+install_course_python_packages
 
 echo
 read -r -p "Hit Enter to reboot"

@@ -1,13 +1,17 @@
 """Lesson 7: Face Detection and Tracking.
 
-Run this on your Windows or macOS computer (face detection runs on the
-computer, not on the Pi). Start the smartcar2026 server on the Pi first with
-`sudo python3 main.py`, then run this with the Pi's IP address:
+You can run this on the Raspberry Pi itself, or on a separate Windows, macOS,
+or Linux computer that connects to the Pi over Wi-Fi. Start the smartcar2026
+server on the Pi first with `sudo python3 main.py`, then run this with the Pi's
+IP address (use 127.0.0.1 if you run it on the Pi itself):
 
     python lesson_7_face_tracking.py 192.168.1.50
 
 A window shows the camera. When a face is found, the car turns its head to keep
 the face in the middle of the picture. Press q to quit.
+
+Face detection is CPU-heavy: a laptop or desktop runs it faster and smoother,
+but the Pi works too as long as it has a screen or a VNC desktop.
 
 Lesson 8 imports this file and reuses these functions, so each one is written to
 do one clear job (connect, read a picture, find faces, move the head).
@@ -16,7 +20,7 @@ do one clear job (connect, read a picture, find faces, move the head).
 import car_setup          # adds the car's code folders to the import path
 import socket             # to connect to the Pi over the network
 import struct             # to read the 4-byte picture size
-import sys                # to read the IP address you type and check the OS
+import sys                # to read the IP address you type on the command line
 
 import cv2                # OpenCV: shows pictures and finds faces
 import numpy as np        # NumPy: turns raw bytes into an image
@@ -55,10 +59,6 @@ def setup():
     """Connect to the Pi and get the face detector ready."""
     global cmd, face_cascade, video_socket, video_file, command_socket
 
-    # Face detection uses OpenCV features meant for a laptop/desktop, so make
-    # sure we are on Windows or macOS, not the Pi.
-    if not (sys.platform.startswith("win") or sys.platform.startswith("darwin")):
-        raise SystemExit("Run this on your Windows or macOS computer.")
     # The IP address is the first thing you type after the file name.
     if len(sys.argv) < 2:
         raise SystemExit("Please pass the Pi's IP address, e.g. python this.py 192.168.1.50")
