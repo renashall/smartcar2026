@@ -157,19 +157,15 @@ configure_headless_vnc() {
   # session exists for VNC to share after every reboot (B4 = desktop autologin).
   run_raspi_config do_boot_behaviour B4
 
-  # RealVNC's screen sharing cannot capture the Wayland desktop that Raspberry
-  # Pi OS Bookworm uses by default, so VNC shows a black screen or "Cannot
-  # currently show the desktop". Switch the desktop to X11, which RealVNC can
-  # share. (do_wayland W1 = X11.) Only attempt this where the option exists.
-  if command -v raspi-config >/dev/null 2>&1 \
-    && sudo raspi-config nonint get_wayland >/dev/null 2>&1; then
-    current_backend="$(sudo raspi-config nonint get_wayland 2>/dev/null || echo unknown)"
-    if [ "$current_backend" = "X11" ]; then
-      echo "Desktop is already using X11; leaving it unchanged."
-    else
-      echo "Switching the desktop session from Wayland to X11 so VNC can share it..."
-      run_raspi_config do_wayland W1
-    fi
+  # RealVNC's screen sharing cannot capture the Wayland desktop (labwc/wayfire)
+  # that Raspberry Pi OS Bookworm uses by default, so VNC shows a black screen
+  # or "Cannot currently show the desktop". Switch the desktop to X11, which
+  # RealVNC can share. do_wayland W1 = "Openbox with X11 backend"; it is
+  # idempotent (no-op if already X11) and simply skipped where unsupported.
+  # (Note: this raspi-config has no get_wayland getter, so we just set it.)
+  if command -v raspi-config >/dev/null 2>&1; then
+    echo "Selecting the X11 desktop backend (do_wayland W1) so VNC can share it..."
+    run_raspi_config do_wayland W1
   fi
 
   # Give the VNC server a virtual screen resolution to use when no monitor is
