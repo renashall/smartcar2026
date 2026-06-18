@@ -4,7 +4,7 @@ import io
 import socket
 import struct
 import time
-import picamera
+from picamera2 import Picamera2   # libcamera-based camera library (Bullseye/Bookworm)
 import fcntl
 import  sys
 import threading
@@ -80,33 +80,36 @@ class Server:
             pass
         self.server_socket.close()
         try:
-            with picamera.PiCamera() as camera:
-                camera.resolution = (400,300)      # pi camera resolution
-                camera.framerate = 15               # 15 frames/sec
-                time.sleep(2)                       # give 2 secs for camera to initilize
-                start = time.time()
-                stream = io.BytesIO()
-                # send jpeg format video stream
-                print ("Start transmit ... ")
-                for foo in camera.capture_continuous(stream, 'jpeg', use_video_port = True):
-                    try:
-                        self.connection.flush()
-                        stream.seek(0)
-                        b = stream.read()
-                        length=len(b)
-                        if length >5120000:
-                            continue
-                        lengthBin = struct.pack('L', length)
-                        self.connection.write(lengthBin)
-                        self.connection.write(b)
-                        stream.seek(0)
-                        stream.truncate()
-                    except Exception as e:
-                        print(e)
-                        print ("End transmit ... " )
-                        break
-        except:
-            #print "Camera unintall"
+            camera = Picamera2()
+            # 400x300 jpeg frames, same resolution the old picamera code used.
+            camera.configure(camera.create_video_configuration(main={"size": (400, 300)}))
+            camera.start()
+            time.sleep(2)                       # give 2 secs for camera to initilize
+            stream = io.BytesIO()
+            # send jpeg format video stream
+            print ("Start transmit ... ")
+            while True:
+                try:
+                    stream.seek(0)
+                    stream.truncate()
+                    camera.capture_file(stream, format='jpeg')   # grab one frame as jpeg
+                    self.connection.flush()
+                    stream.seek(0)
+                    b = stream.read()
+                    length=len(b)
+                    if length >5120000:
+                        continue
+                    lengthBin = struct.pack('L', length)
+                    self.connection.write(lengthBin)
+                    self.connection.write(b)
+                except Exception as e:
+                    print(e)
+                    print ("End transmit ... " )
+                    break
+            camera.stop()
+            camera.close()
+        except Exception as e:
+            print(e)
             pass
                  
     def stopMode(self):

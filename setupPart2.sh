@@ -30,43 +30,85 @@ find_package_dir() {
   exit 1
 }
 
-ask_pi_model() {
-  echo "Which Raspberry Pi are you using?"
-  echo "1) Raspberry Pi 4B"
-  echo "2) Raspberry Pi 400"
-  echo "3) Raspberry Pi 3B+"
-  echo "4) Raspberry Pi 3B"
-  echo "5) Other"
+# Detect the Raspberry Pi model, OS, architecture, and camera stack instead of
+# asking the user. Every other function reads the variables this sets.
+detect_environment() {
+  # --- Raspberry Pi model ---
+  PI_MODEL_RAW="Unknown"
+  if [ -r /proc/device-tree/model ]; then
+    # The device-tree model string is NUL-terminated, so strip the trailing NUL.
+    PI_MODEL_RAW="$(tr -d '\0' < /proc/device-tree/model)"
+  elif [ -r /proc/cpuinfo ]; then
+    PI_MODEL_RAW="$(grep -m1 -i '^Model' /proc/cpuinfo | cut -d: -f2- | sed 's/^[[:space:]]*//')"
+  fi
 
-  while true; do
-    read -r -p "Enter 1-5: " choice
-    case "$choice" in
-      1) PI_MODEL="4B"; DISABLE_AUDIO="no"; break ;;
-      2) PI_MODEL="400"; DISABLE_AUDIO="no"; break ;;
-      3) PI_MODEL="3B+"; DISABLE_AUDIO="yes"; break ;;
-      4) PI_MODEL="3B"; DISABLE_AUDIO="yes"; break ;;
-      5) PI_MODEL="Other"; DISABLE_AUDIO="yes"; break ;;
-      *) echo "Please enter a number from 1 to 5." ;;
+  case "$PI_MODEL_RAW" in
+    *"Raspberry Pi 5"*)              PI_MODEL="5" ;;
+    *"Raspberry Pi 400"*)            PI_MODEL="400" ;;
+    *"Raspberry Pi 4"*)              PI_MODEL="4B" ;;
+    *"Raspberry Pi 3 Model B Plus"*) PI_MODEL="3B+" ;;
+    *"Raspberry Pi 3"*)              PI_MODEL="3B" ;;
+    *"Raspberry Pi 2"*)              PI_MODEL="2B" ;;
+    *"Raspberry Pi Zero"*)           PI_MODEL="Zero" ;;
+    *)                               PI_MODEL="Other" ;;
+  esac
+
+  # Older models need the buzzer/audio workaround; the Pi 4 / 400 / 5 do not.
+  case "$PI_MODEL" in
+    4B|400|5) DISABLE_AUDIO="no" ;;
+    *)        DISABLE_AUDIO="yes" ;;
+  esac
+
+  # --- Operating system (Bookworm / Bullseye / Buster / ...) ---
+  OS_CODENAME="unknown"
+  OS_VERSION_ID="unknown"
+  OS_PRETTY="unknown"
+  if [ -r /etc/os-release ]; then
+    # shellcheck source=/dev/null
+    . /etc/os-release
+    OS_CODENAME="${VERSION_CODENAME:-unknown}"
+    OS_VERSION_ID="${VERSION_ID:-unknown}"
+    OS_PRETTY="${PRETTY_NAME:-unknown}"
+  fi
+
+  # --- User-space architecture: 32-bit (armhf) or 64-bit (arm64) ---
+  KERNEL_ARCH="$(uname -m 2>/dev/null || echo unknown)"
+  if command -v getconf >/dev/null 2>&1; then
+    OS_BITS="$(getconf LONG_BIT 2>/dev/null || echo unknown)"
+  else
+    case "$KERNEL_ARCH" in
+      aarch64|arm64) OS_BITS="64" ;;
+      armv6l|armv7l) OS_BITS="32" ;;
+      *)             OS_BITS="unknown" ;;
     esac
-  done
+  fi
+  if command -v dpkg >/dev/null 2>&1; then
+    DPKG_ARCH="$(dpkg --print-architecture 2>/dev/null || echo unknown)"
+  else
+    DPKG_ARCH="unknown"
+  fi
+
+  # --- Camera stack: legacy (MMAL/picamera) vs libcamera (picamera2) ---
+  # Buster and earlier use the legacy camera stack; Bullseye and Bookworm use
+  # libcamera with picamera2. This drives every camera-related decision below.
+  case "$OS_CODENAME" in
+    bookworm|trixie|bullseye) CAMERA_STACK="libcamera" ;;
+    buster|stretch|jessie)    CAMERA_STACK="legacy" ;;
+    *)
+      # Unknown OS: assume a modern libcamera system, the safe default on any
+      # current Raspberry Pi OS image.
+      CAMERA_STACK="libcamera"
+      ;;
+  esac
 }
 
-ask_os_date() {
+print_detection() {
   echo
-  echo "Is your Raspberry Pi OS image dated 2021-10-30 or later?"
-  echo "1) Yes, 2021-10-30 or later"
-  echo "2) No, earlier than 2021-10-30"
-  echo "3) Not sure"
-
-  while true; do
-    read -r -p "Enter 1-3: " choice
-    case "$choice" in
-      1) OS_20211030_OR_LATER="yes"; break ;;
-      2) OS_20211030_OR_LATER="no"; break ;;
-      3) OS_20211030_OR_LATER="unknown"; break ;;
-      *) echo "Please enter a number from 1 to 3." ;;
-    esac
-  done
+  echo "Detected environment:"
+  echo "  Raspberry Pi : $PI_MODEL ($PI_MODEL_RAW)"
+  echo "  OS           : $OS_PRETTY [codename: $OS_CODENAME, version: $OS_VERSION_ID]"
+  echo "  Architecture : ${OS_BITS}-bit (kernel $KERNEL_ARCH, dpkg $DPKG_ARCH)"
+  echo "  Camera stack : $CAMERA_STACK"
 }
 
 find_config_file() {
@@ -97,17 +139,29 @@ set_config_value() {
 
 edit_camera_config() {
   echo
-  echo "Editing camera config in $CONFIG_FILE..."
+  echo "Configuring the camera in $CONFIG_FILE for the $CAMERA_STACK stack..."
   sudo touch "$CONFIG_FILE"
 
-  sudo sed -i 's/^camera_auto_detect=1/# camera_auto_detect=1/' "$CONFIG_FILE"
-
-  set_config_value start_x 1
-  set_config_value gpu_mem 128
-
-  if [ "$OS_20211030_OR_LATER" = "no" ]; then
-    echo "Earlier OS selected. If camera_auto_detect is not present, that is expected."
-  fi
+  case "$CAMERA_STACK" in
+    libcamera)
+      # libcamera / picamera2 needs camera auto-detect ON and must NOT use the
+      # legacy firmware camera settings. Remove any legacy leftovers (including
+      # from an earlier run of this script) so they cannot block the camera.
+      sudo sed -i '/^[# ]*start_x=.*/d' "$CONFIG_FILE"
+      sudo sed -i '/^[# ]*gpu_mem=.*/d' "$CONFIG_FILE"
+      sudo sed -i '/^[# ]*camera_auto_detect=.*/d' "$CONFIG_FILE"
+      printf 'camera_auto_detect=1\n' | sudo tee -a "$CONFIG_FILE" >/dev/null
+      echo "Set camera_auto_detect=1 and removed legacy start_x / gpu_mem."
+      ;;
+    legacy)
+      # Legacy camera firmware: enable start_x and a GPU memory split, and turn
+      # off the newer auto-detect line if it is present.
+      sudo sed -i 's/^camera_auto_detect=1/# camera_auto_detect=1/' "$CONFIG_FILE"
+      set_config_value start_x 1
+      set_config_value gpu_mem 128
+      echo "Enabled legacy camera (start_x=1, gpu_mem=128)."
+      ;;
+  esac
 }
 
 disable_audio_for_older_pi_models() {
@@ -156,10 +210,18 @@ install_course_python_packages() {
 
   sudo apt-get update || true
 
+  # Pick the camera library that matches this OS's camera stack: picamera2 for
+  # libcamera systems (Bullseye/Bookworm), legacy picamera for Buster/earlier.
+  if [ "$CAMERA_STACK" = "legacy" ]; then
+    camera_pkg="python3-picamera"
+  else
+    camera_pkg="python3-picamera2"
+  fi
+
   # Prefer apt on the Pi: these prebuilt packages install far faster and more
   # reliably than building wheels with pip. Each one is installed on its own so
   # a single missing package never blocks the rest.
-  for pkg in python3-numpy python3-opencv python3-pil python3-pyqt5 python3-picamera; do
+  for pkg in python3-numpy python3-opencv python3-pil python3-pyqt5 "$camera_pkg"; do
     echo "  - $pkg"
     sudo apt-get install -y "$pkg" || echo "    (could not install $pkg with apt; continuing)"
   done
@@ -177,14 +239,12 @@ install_course_python_packages() {
 }
 
 find_package_dir
-ask_pi_model
-ask_os_date
+detect_environment
 find_config_file
+print_detection
 
 echo
 echo "Using Freenove package folder: $PACKAGE_DIR"
-echo "Selected Raspberry Pi model: $PI_MODEL"
-echo "Selected OS date option: $OS_20211030_OR_LATER"
 echo "Using config file: $CONFIG_FILE"
 
 backup_config_file
