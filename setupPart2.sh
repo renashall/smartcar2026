@@ -226,16 +226,45 @@ install_course_python_packages() {
     sudo apt-get install -y "$pkg" || echo "    (could not install $pkg with apt; continuing)"
   done
 
-  # Fallback: install anything still missing from requirements.txt with pip.
-  req_file="$PACKAGE_DIR/requirements.txt"
-  if [ -f "$req_file" ]; then
-    echo "Checking requirements.txt with pip for anything still missing..."
-    sudo pip3 install -r "$req_file" 2>/dev/null \
-      || sudo pip3 install --break-system-packages -r "$req_file" 2>/dev/null \
-      || echo "pip step skipped; the apt packages above are normally enough."
+  # Deliberately NO pip fallback here. On the Pi, pip-installing numpy / opencv /
+  # etc. into /usr/local shadows the working apt packages with copies that often
+  # build incompletely, which breaks imports like:
+  #   "ImportError: Error importing numpy ... import numpy from its source dir".
+  # The apt packages above are the supported set; requirements.txt is only for
+  # separate (non-Pi) computers.
+
+  # Self-heal: remove any pip-installed copies of these libraries that a previous
+  # setup may have left in /usr/local. They shadow the apt versions and often
+  # fail to import (e.g. numpy missing libopenblas.so.0). On the Pi these must
+  # come from apt, so dropping the pip copies is always the right move.
+  if command -v pip3 >/dev/null 2>&1; then
+    echo "Removing any pip-installed copies that would shadow the apt packages..."
+    for pip_pkg in numpy opencv-python opencv-contrib-python Pillow PyQt5; do
+      sudo pip3 uninstall -y "$pip_pkg" --break-system-packages >/dev/null 2>&1 || true
+    done
   fi
 
-  echo "Lesson Python packages are ready."
+  # Verify the key modules actually import, so a problem shows up here instead of
+  # halfway through a lesson.
+  echo "Verifying the lesson Python packages import correctly..."
+  if python3 - <<'PY'
+import importlib.util, sys
+modules = ["numpy", "cv2", "PIL", "PyQt5"]
+missing = [m for m in modules if importlib.util.find_spec(m) is None]
+if missing:
+    print("  Missing/broken modules:", ", ".join(missing))
+    sys.exit(1)
+import numpy
+print("  numpy", numpy.__version__, "from", numpy.__file__)
+print("  all core lesson modules import OK")
+PY
+  then
+    echo "Lesson Python packages are ready."
+  else
+    echo "Some packages did not import. Make sure none were pip-installed into"
+    echo "/usr/local (which shadows the apt versions). To clean that up, run:"
+    echo "  sudo pip3 uninstall -y numpy opencv-python Pillow PyQt5 --break-system-packages"
+  fi
 }
 
 find_package_dir
