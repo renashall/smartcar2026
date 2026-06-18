@@ -30,43 +30,85 @@ find_package_dir() {
   exit 1
 }
 
-ask_pi_model() {
-  echo "Which Raspberry Pi are you using?"
-  echo "1) Raspberry Pi 4B"
-  echo "2) Raspberry Pi 400"
-  echo "3) Raspberry Pi 3B+"
-  echo "4) Raspberry Pi 3B"
-  echo "5) Other"
+# Detect the Raspberry Pi model, OS, architecture, and camera stack instead of
+# asking the user. Every other function reads the variables this sets.
+detect_environment() {
+  # --- Raspberry Pi model ---
+  PI_MODEL_RAW="Unknown"
+  if [ -r /proc/device-tree/model ]; then
+    # The device-tree model string is NUL-terminated, so strip the trailing NUL.
+    PI_MODEL_RAW="$(tr -d '\0' < /proc/device-tree/model)"
+  elif [ -r /proc/cpuinfo ]; then
+    PI_MODEL_RAW="$(grep -m1 -i '^Model' /proc/cpuinfo | cut -d: -f2- | sed 's/^[[:space:]]*//')"
+  fi
 
-  while true; do
-    read -r -p "Enter 1-5: " choice
-    case "$choice" in
-      1) PI_MODEL="4B"; break ;;
-      2) PI_MODEL="400"; break ;;
-      3) PI_MODEL="3B+"; break ;;
-      4) PI_MODEL="3B"; break ;;
-      5) PI_MODEL="Other"; break ;;
-      *) echo "Please enter a number from 1 to 5." ;;
+  case "$PI_MODEL_RAW" in
+    *"Raspberry Pi 5"*)              PI_MODEL="5" ;;
+    *"Raspberry Pi 400"*)            PI_MODEL="400" ;;
+    *"Raspberry Pi 4"*)              PI_MODEL="4B" ;;
+    *"Raspberry Pi 3 Model B Plus"*) PI_MODEL="3B+" ;;
+    *"Raspberry Pi 3"*)              PI_MODEL="3B" ;;
+    *"Raspberry Pi 2"*)              PI_MODEL="2B" ;;
+    *"Raspberry Pi Zero"*)           PI_MODEL="Zero" ;;
+    *)                               PI_MODEL="Other" ;;
+  esac
+
+  # Older models need the buzzer/audio workaround; the Pi 4 / 400 / 5 do not.
+  case "$PI_MODEL" in
+    4B|400|5) DISABLE_AUDIO="no" ;;
+    *)        DISABLE_AUDIO="yes" ;;
+  esac
+
+  # --- Operating system (Bookworm / Bullseye / Buster / ...) ---
+  OS_CODENAME="unknown"
+  OS_VERSION_ID="unknown"
+  OS_PRETTY="unknown"
+  if [ -r /etc/os-release ]; then
+    # shellcheck source=/dev/null
+    . /etc/os-release
+    OS_CODENAME="${VERSION_CODENAME:-unknown}"
+    OS_VERSION_ID="${VERSION_ID:-unknown}"
+    OS_PRETTY="${PRETTY_NAME:-unknown}"
+  fi
+
+  # --- User-space architecture: 32-bit (armhf) or 64-bit (arm64) ---
+  KERNEL_ARCH="$(uname -m 2>/dev/null || echo unknown)"
+  if command -v getconf >/dev/null 2>&1; then
+    OS_BITS="$(getconf LONG_BIT 2>/dev/null || echo unknown)"
+  else
+    case "$KERNEL_ARCH" in
+      aarch64|arm64) OS_BITS="64" ;;
+      armv6l|armv7l) OS_BITS="32" ;;
+      *)             OS_BITS="unknown" ;;
     esac
-  done
+  fi
+  if command -v dpkg >/dev/null 2>&1; then
+    DPKG_ARCH="$(dpkg --print-architecture 2>/dev/null || echo unknown)"
+  else
+    DPKG_ARCH="unknown"
+  fi
+
+  # --- Camera stack: legacy (MMAL/picamera) vs libcamera (picamera2) ---
+  # Buster and earlier use the legacy camera stack; Bullseye and Bookworm use
+  # libcamera with picamera2. This drives every camera-related decision below.
+  case "$OS_CODENAME" in
+    bookworm|trixie|bullseye) CAMERA_STACK="libcamera" ;;
+    buster|stretch|jessie)    CAMERA_STACK="legacy" ;;
+    *)
+      # Unknown OS: assume a modern libcamera system, the safe default on any
+      # current Raspberry Pi OS image.
+      CAMERA_STACK="libcamera"
+      ;;
+  esac
 }
 
-ask_os_date() {
+print_detection() {
   echo
-  echo "Is your Raspberry Pi OS image dated 2021-10-30 or later?"
-  echo "1) Yes, 2021-10-30 or later"
-  echo "2) No, earlier than 2021-10-30"
-  echo "3) Not sure"
-
-  while true; do
-    read -r -p "Enter 1-3: " choice
-    case "$choice" in
-      1) OS_20211030_OR_LATER="yes"; break ;;
-      2) OS_20211030_OR_LATER="no"; break ;;
-      3) OS_20211030_OR_LATER="unknown"; break ;;
-      *) echo "Please enter a number from 1 to 3." ;;
-    esac
-  done
+  echo "Detected environment:"
+  echo "  Raspberry Pi : $PI_MODEL ($PI_MODEL_RAW)"
+  echo "  OS           : $OS_PRETTY [codename: $OS_CODENAME, version: $OS_VERSION_ID]"
+  echo "  Architecture : ${OS_BITS}-bit (kernel $KERNEL_ARCH, dpkg $DPKG_ARCH)"
+  echo "  Camera stack : $CAMERA_STACK"
 }
 
 run_raspi_config() {
@@ -77,12 +119,75 @@ run_raspi_config() {
   fi
 }
 
+# raspi-config's nonint getters echo "0" when the interface is already enabled
+# and "1" when it is disabled. Returns success only when it is already enabled.
+interface_enabled() {
+  getter="$1"
+  if command -v raspi-config >/dev/null 2>&1; then
+    [ "$(sudo raspi-config nonint "$getter" 2>/dev/null)" = "0" ]
+  else
+    return 1
+  fi
+}
+
+# Enable an interface only if it is not already on, so re-running the script
+# does not needlessly toggle interfaces that are already configured.
+ensure_interface_enabled() {
+  name="$1"    # human-friendly label, e.g. VNC
+  getter="$2"  # raspi-config getter, e.g. get_vnc
+  setter="$3"  # raspi-config setter, e.g. do_vnc
+
+  if interface_enabled "$getter"; then
+    echo "$name is already enabled; leaving it unchanged."
+  else
+    echo "Enabling $name..."
+    run_raspi_config "$setter" 0
+  fi
+}
+
+# A headless Pi has no monitor, so after a reboot the VNC server has no display
+# to share and RealVNC shows "Cannot currently show the desktop". Booting into
+# the desktop and giving VNC a virtual screen resolution fixes this. Both are
+# plain raspi-config calls, so no manual config.txt editing is needed.
+configure_headless_vnc() {
+  echo
+  echo "Setting up the desktop and a virtual screen so VNC works without a monitor..."
+
+  # Boot straight into the desktop and log in automatically so a desktop
+  # session exists for VNC to share after every reboot (B4 = desktop autologin).
+  run_raspi_config do_boot_behaviour B4
+
+  # RealVNC's screen sharing cannot capture the Wayland desktop that Raspberry
+  # Pi OS Bookworm uses by default, so VNC shows a black screen or "Cannot
+  # currently show the desktop". Switch the desktop to X11, which RealVNC can
+  # share. (do_wayland W1 = X11.) Only attempt this where the option exists.
+  if command -v raspi-config >/dev/null 2>&1 \
+    && sudo raspi-config nonint get_wayland >/dev/null 2>&1; then
+    current_backend="$(sudo raspi-config nonint get_wayland 2>/dev/null || echo unknown)"
+    if [ "$current_backend" = "X11" ]; then
+      echo "Desktop is already using X11; leaving it unchanged."
+    else
+      echo "Switching the desktop session from Wayland to X11 so VNC can share it..."
+      run_raspi_config do_wayland W1
+    fi
+  fi
+
+  # Give the VNC server a virtual screen resolution to use when no monitor is
+  # attached. Ignored on OS versions that do not support it.
+  run_raspi_config do_vnc_resolution 1280x720
+
+  # Apply the changes now by restarting whichever VNC service is installed; they
+  # also take effect on the next reboot.
+  sudo systemctl restart vncserver-x11-serviced.service >/dev/null 2>&1 || true
+  sudo systemctl restart wayvnc.service >/dev/null 2>&1 || true
+}
+
 enable_interfaces() {
   echo
-  echo "Enabling SSH, VNC, and I2C..."
-  run_raspi_config do_ssh 0
-  run_raspi_config do_vnc 0
-  run_raspi_config do_i2c 0
+  echo "Checking SSH, VNC, and I2C..."
+  ensure_interface_enabled "SSH" get_ssh do_ssh
+  ensure_interface_enabled "VNC" get_vnc do_vnc
+  ensure_interface_enabled "I2C" get_i2c do_i2c
 
   sudo systemctl enable --now ssh >/dev/null 2>&1 || true
   sudo systemctl enable --now vncserver-x11-serviced.service >/dev/null 2>&1 || true
@@ -97,21 +202,17 @@ enable_interfaces() {
 
 configure_camera_interface() {
   echo
-  case "$OS_20211030_OR_LATER" in
-    yes)
-      echo "OS is 2021-10-30 or later. Disabling the legacy Camera interface if that option exists..."
-      run_raspi_config do_camera 1
+  case "$CAMERA_STACK" in
+    libcamera)
+      echo "OS uses the libcamera camera stack (picamera2); the legacy camera is not needed."
+      # Make sure the legacy camera is OFF so libcamera stays active. This is a
+      # no-op on Bookworm, where the legacy option has been removed.
       run_raspi_config do_legacy 1
       ;;
-    no)
-      echo "OS is earlier than 2021-10-30. Enabling the Camera interface if that option exists..."
+    legacy)
+      echo "OS uses the legacy camera stack. Enabling the Camera interface..."
       run_raspi_config do_camera 0
       run_raspi_config do_legacy 0
-      ;;
-    unknown)
-      echo "OS date is unknown. Leaving the Camera interface unchanged."
-      echo "If your OS is earlier than 2021-10-30, enable Camera manually."
-      echo "If your OS is 2021-10-30 or later, disable Camera manually."
       ;;
   esac
 }
@@ -162,6 +263,14 @@ check_project_files() {
 
 apply_bullseye_patch() {
   echo
+  # The patch swaps in a legacy MMAL (libmmal.so) library, which only exists on
+  # the legacy 32-bit camera stack. On libcamera systems (Bullseye/Bookworm with
+  # picamera2) it is unnecessary and the target files do not exist, so skip it.
+  if [ "$CAMERA_STACK" != "legacy" ]; then
+    echo "Skipping the legacy libmmal patch (not needed with the libcamera stack)."
+    return
+  fi
+
   patch_dir="$PACKAGE_DIR/Code/Patch"
   patch_script="$patch_dir/patch_for_bullseye.sh"
 
@@ -180,15 +289,14 @@ apply_bullseye_patch() {
 }
 
 find_package_dir
-ask_pi_model
-ask_os_date
+detect_environment
+print_detection
 
 echo
 echo "Using Freenove package folder: $PACKAGE_DIR"
-echo "Selected Raspberry Pi model: $PI_MODEL"
-echo "Selected OS date option: $OS_20211030_OR_LATER"
 
 enable_interfaces
+configure_headless_vnc
 configure_camera_interface
 make_python3_default
 check_project_files
