@@ -32,3 +32,29 @@ python3 lesson_1_components.py
 ```
 
 Replace `lesson_1_components.py` with the file you want to run.
+
+### Run the LED lessons with `sudo`
+
+The LED strip library (`rpi_ws281x`) needs root access on the Raspberry Pi.
+Any lesson that lights the LEDs — **Lesson 1** and **Lesson 2** — must be run
+with `sudo`, or it will stop with a permission error such as
+`mmap() failed` / `Can't open /dev/mem`:
+
+```sh
+sudo python3 lesson_1_components.py
+```
+
+The other on-Pi lessons (motors, servo, ADC, ultrasonic, line sensors) work
+without `sudo`, but running them with `sudo` is also fine.
+
+### Where each lesson runs
+
+- **On the Raspberry Pi (the car):** Lessons 1–5 and
+  `lesson_6_pi_camera_stream_server.py`. These import the car's hardware
+  modules and need the Pi's hardware libraries.
+- **On the Pi *or* a laptop (Windows / macOS / Linux):**
+  `lesson_6_client_video_receiver.py`, Lesson 7, Lesson 8, and Lesson 11.
+  These only need `opencv-python`, `numpy`, and (for Lesson 11) `PyQt5`,
+  which are listed in the repo's `requirements.txt`. When run from a laptop,
+  pass the Pi's IP address on the command line (Lessons 6-client/7/8) or type
+  it into the box (Lesson 11).

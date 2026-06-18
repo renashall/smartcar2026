@@ -14,7 +14,7 @@ import time               # "time" lets us pause the program with time.sleep()
 # These three modules come from the car's Server folder. Each one controls a
 # piece of hardware: the LED lights, the head servo, and the distance sensor.
 from Led import Led
-from Servo import Servo
+from servo import Servo          # NOTE: the module file is "servo.py" (lowercase)
 from Ultrasonic import Ultrasonic
 
 # ---- settings you can change ----
