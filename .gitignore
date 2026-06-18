@@ -17,6 +17,7 @@ Desktop.ini
 *.swp
 *.swo
 *.tmp
+*Internal_Debug
 
 # Python
 __pycache__/
