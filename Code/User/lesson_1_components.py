@@ -37,6 +37,9 @@ HEAD_LEFT = 30
 HEAD_CENTER = 90
 HEAD_RIGHT = 150
 
+# How long the servo demo keeps sweeping the head back and forth, in seconds.
+SERVO_DEMO_SECONDS = 5
+
 # ---- car parts (created in setup) ----
 # We list the parts here and set them to None for now. setup() fills them in.
 # Using None first makes it clear these get created later, in one place.
@@ -68,11 +71,17 @@ def show_leds():
 
 
 def sweep_head():
-    """Turn the head left, back to center, right, then center again."""
-    print("Servo demo: look left, center, right")
-    for angle in (HEAD_LEFT, HEAD_CENTER, HEAD_RIGHT, HEAD_CENTER):
-        servo.setServoPwm("0", angle)        # channel "0" is the left/right servo
-        time.sleep(0.6)                      # give the servo time to move
+    """Sweep the head left and right for SERVO_DEMO_SECONDS, then re-center."""
+    print("Servo demo: sweeping for", SERVO_DEMO_SECONDS, "seconds")
+    end_time = time.time() + SERVO_DEMO_SECONDS   # the moment we should stop
+    # Keep sweeping through the positions until the 5 seconds have passed.
+    while time.time() < end_time:
+        for angle in (HEAD_LEFT, HEAD_CENTER, HEAD_RIGHT, HEAD_CENTER):
+            if time.time() >= end_time:      # check the clock between each move
+                break
+            servo.setServoPwm("0", angle)    # channel "0" is the left/right servo
+            time.sleep(0.6)                  # give the servo time to move
+    servo.setServoPwm("0", HEAD_CENTER)      # finish facing straight ahead
 
 
 def read_distance():
@@ -111,6 +120,7 @@ if __name__ == "__main__":
             sweep_head()
         if DEMO_MODE in ("distance", "all"):
             loop()
+        print("Component testing was completed.")
     except KeyboardInterrupt:
         # This happens when you press Ctrl+C. We catch it so the program can
         # shut down cleanly instead of printing a scary error message.

@@ -1,0 +1,4 @@
+# Keep shell scripts LF so they run on the Raspberry Pi (Linux).
+# Without this, git on Windows can check them out with CRLF, which breaks
+# the shebang line (e.g. "/usr/bin/env: 'bash\r': No such file or directory").
+*.sh text eol=lf
