@@ -77,12 +77,59 @@ run_raspi_config() {
   fi
 }
 
+# raspi-config's nonint getters echo "0" when the interface is already enabled
+# and "1" when it is disabled. Returns success only when it is already enabled.
+interface_enabled() {
+  getter="$1"
+  if command -v raspi-config >/dev/null 2>&1; then
+    [ "$(sudo raspi-config nonint "$getter" 2>/dev/null)" = "0" ]
+  else
+    return 1
+  fi
+}
+
+# Enable an interface only if it is not already on, so re-running the script
+# does not needlessly toggle interfaces that are already configured.
+ensure_interface_enabled() {
+  name="$1"    # human-friendly label, e.g. VNC
+  getter="$2"  # raspi-config getter, e.g. get_vnc
+  setter="$3"  # raspi-config setter, e.g. do_vnc
+
+  if interface_enabled "$getter"; then
+    echo "$name is already enabled; leaving it unchanged."
+  else
+    echo "Enabling $name..."
+    run_raspi_config "$setter" 0
+  fi
+}
+
+# A headless Pi has no monitor, so after a reboot the VNC server has no display
+# to share and RealVNC shows "Cannot currently show the desktop". Booting into
+# the desktop and giving VNC a virtual screen resolution fixes this. Both are
+# plain raspi-config calls, so no manual config.txt editing is needed.
+configure_headless_vnc() {
+  echo
+  echo "Setting up the desktop and a virtual screen so VNC works without a monitor..."
+
+  # Boot straight into the desktop and log in automatically so a desktop
+  # session exists for VNC to share after every reboot (B4 = desktop autologin).
+  run_raspi_config do_boot_behaviour B4
+
+  # Give the VNC server a virtual screen resolution to use when no monitor is
+  # attached. Without this, a headless Pi cannot show a desktop over VNC.
+  run_raspi_config do_vnc_resolution 1280x720
+
+  # Apply the new resolution now by restarting the VNC service (it also starts
+  # on the next reboot).
+  sudo systemctl restart vncserver-x11-serviced.service >/dev/null 2>&1 || true
+}
+
 enable_interfaces() {
   echo
-  echo "Enabling SSH, VNC, and I2C..."
-  run_raspi_config do_ssh 0
-  run_raspi_config do_vnc 0
-  run_raspi_config do_i2c 0
+  echo "Checking SSH, VNC, and I2C..."
+  ensure_interface_enabled "SSH" get_ssh do_ssh
+  ensure_interface_enabled "VNC" get_vnc do_vnc
+  ensure_interface_enabled "I2C" get_i2c do_i2c
 
   sudo systemctl enable --now ssh >/dev/null 2>&1 || true
   sudo systemctl enable --now vncserver-x11-serviced.service >/dev/null 2>&1 || true
@@ -189,6 +236,7 @@ echo "Selected Raspberry Pi model: $PI_MODEL"
 echo "Selected OS date option: $OS_20211030_OR_LATER"
 
 enable_interfaces
+configure_headless_vnc
 configure_camera_interface
 make_python3_default
 check_project_files
