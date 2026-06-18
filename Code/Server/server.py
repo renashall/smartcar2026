@@ -38,22 +38,35 @@ class Server:
         self.endChar='\n'
         self.intervalChar='#'
     def get_interface_ip(self):
+        # Find the Pi's primary LAN IP for display, without assuming an
+        # interface name. (The old code was hard-coded to wlan0 and failed on
+        # Ethernet or when Wi-Fi was down.) Opening a UDP socket to a dummy
+        # address makes the OS pick the outgoing interface; no data is sent.
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        return socket.inet_ntoa(fcntl.ioctl(s.fileno(),
-                                            0x8915,
-                                            struct.pack('256s',b'wlan0'[:15])
-                                            )[20:24])
+        try:
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+        except Exception:
+            ip = '127.0.0.1'
+        finally:
+            s.close()
+        return ip
+
     def StartTcpServer(self):
-        HOST=str(self.get_interface_ip())
+        display_ip = str(self.get_interface_ip())
+        # Bind to all interfaces ('') so the client can connect via the Pi's
+        # Wi-Fi IP, its Ethernet IP, or 127.0.0.1 (handy when the client runs on
+        # the Pi too). Binding to a single interface IP was the cause of a client
+        # connecting while the server reported no connection.
         self.server_socket1 = socket.socket()
-        self.server_socket1.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEPORT,1)
-        self.server_socket1.bind((HOST, 5000))
+        self.server_socket1.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+        self.server_socket1.bind(('', 5000))
         self.server_socket1.listen(1)
         self.server_socket = socket.socket()
-        self.server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEPORT,1)
-        self.server_socket.bind((HOST, 8000))              
+        self.server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+        self.server_socket.bind(('', 8000))
         self.server_socket.listen(1)
-        print('Server address: '+HOST)
+        print('Server address: '+display_ip)
         
         
     def StopTcpServer(self):
