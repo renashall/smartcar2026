@@ -12,7 +12,7 @@ import socket             # socket lets two computers talk over the network
 import struct             # struct turns a number into a fixed set of bytes
 import time
 
-import picamera          # controls the Raspberry Pi camera
+from picamera2 import Picamera2   # controls the Raspberry Pi camera (Bookworm)
 
 # ---- settings ----
 VIDEO_PORT = 8000         # the "door number" the computer connects to
@@ -41,9 +41,10 @@ def setup():
     server_socket.listen(1)                  # start listening for 1 connection
     print("Camera server is ready on port", VIDEO_PORT, "- waiting for the computer...")
 
-    camera = picamera.PiCamera()
-    camera.resolution = (FRAME_WIDTH, FRAME_HEIGHT)
-    camera.framerate = FRAME_RATE
+    camera = Picamera2()
+    camera.configure(camera.create_video_configuration(
+        main={"size": (FRAME_WIDTH, FRAME_HEIGHT)}))
+    camera.start()
     time.sleep(WARMUP_SECONDS)               # let the camera settle
 
 
@@ -60,9 +61,13 @@ def accept_client():
 
 def loop():
     """Capture pictures forever and send each one down the pipe."""
-    # capture_continuous keeps taking photos and dropping each one into "stream".
     stream = io.BytesIO()                     # an empty in-memory file for the photo
-    for _ in camera.capture_continuous(stream, "jpeg", use_video_port=True):
+    while True:
+        # Empty the in-memory file, then take one fresh JPEG photo into it.
+        stream.seek(0)
+        stream.truncate()
+        camera.capture_file(stream, format="jpeg")
+
         # First send the SIZE of this picture so the computer knows how many
         # bytes to read. struct.pack("<L", length) makes a 4-byte number.
         length = stream.tell()               # how many bytes the photo took
@@ -72,10 +77,6 @@ def loop():
         # Now send the picture data itself.
         stream.seek(0)                       # rewind to the start of the photo
         connection.write(stream.read())
-
-        # Empty the in-memory file so it is ready for the next photo.
-        stream.seek(0)
-        stream.truncate()
 
 
 def destroy():
@@ -88,6 +89,7 @@ def destroy():
             pass                             # the computer may already be gone
         connection.close()
     if camera is not None:
+        camera.stop()
         camera.close()
     if server_socket is not None:
         server_socket.close()
