@@ -14,7 +14,7 @@ import time
 
 from Motor import Motor          # driving wheels
 from ADC import Adc              # reads the light sensors (for "light" mode)
-from Servo import Servo          # turns the head (for "sonic" mode)
+from servo import Servo          # turns the head (module file is "servo.py", lowercase)
 from Ultrasonic import Ultrasonic   # measures distance (for "sonic" mode)
 
 # ---- settings you can change ----
