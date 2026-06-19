@@ -10,16 +10,17 @@
 
 - **Use command in console**
 
-  Run following command to download all the files in this repository.
+  Run the following command to download this course repository.
 
-  `git clone https://github.com/Freenove/Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi.git`
+  `git clone https://github.com/renashall/smartcar2026.git`
 
 - **Manually download in browser**
 
   Click the green "Clone or download" button, then click "Download ZIP" button in the pop-up window.
   Do NOT click the "Open in Desktop" button, it will lead you to install Github software.
 
-> If you meet any difficulties, please contact our support team for help.
+> This repository is based on Freenove's original smart car kit files, with
+> AI Code Academy course material added on top.
 
 ### Computer (laptop / desktop) Setup
 

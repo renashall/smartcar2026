@@ -23,8 +23,8 @@ find_package_dir() {
     current_dir="$(dirname "$current_dir")"
   done
 
-  echo "Could not find the Freenove package folder."
-  echo "Place this script in the Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi folder or its Code folder."
+  echo "Could not find the smartcar2026 package folder."
+  echo "Place this script in the smartcar2026 folder or its Code folder."
   exit 1
 }
 

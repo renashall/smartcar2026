@@ -17,8 +17,11 @@ See `CHANGES.md` for the full list of additions.
   editing unless necessary.
 - `Code/Client/` — Freenove desktop client (PyQt5). Preserved Freenove code.
 - `Code/User/` — **course lesson scripts** (the primary place for new work).
-  Keep student/course code here, separate from the Freenove source.
-- `Code/Patch/`, `Datasheet/`, `Picture/`, `Resources/` — assets and patches.
+  Keep student/course code here, separate from the Freenove source. The private
+  working branch keeps lesson `.py` files here; the public `main` branch keeps
+  only `car_setup.py` and `user.md` in this folder.
+- `Application/`, `Code/Patch/`, `Datasheet/`, `Resources/` — original app
+  files, assets, datasheets, and patches.
 - `Code/setupPart1.sh` / `Code/setupPart2.sh` — two-stage Raspberry Pi setup
   (they locate the repo via `Code/Server/main.py`).
 - `Code/setup.py` — cross-platform laptop/desktop installer: detects the
@@ -31,7 +34,7 @@ See `CHANGES.md` for the full list of additions.
 
 - Each on-Pi lesson starts with `import car_setup` BEFORE importing any car
   module. `car_setup.py` adds `Code/Server` and `Code/Client` to `sys.path`, so
-  `from motor import Motor` (etc.) resolves to the Server modules.
+  imports like `from Motor import Motor` resolve to the Server modules.
   `car_setup.CODE_DIR` points at `Code/`.
 - **Module name casing matters.** The Raspberry Pi filesystem is
   case-sensitive. Import names must match the real filenames exactly, e.g.
