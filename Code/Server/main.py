@@ -37,6 +37,11 @@ class mywindow(QMainWindow,Ui_server_ui):
             self.Button_Server.clicked.connect(self.on_pushButton)
             self.pushButton_Close.clicked.connect(self.close)
             self.pushButton_Min.clicked.connect(self.windowMinimumed)
+            # Poll the battery voltage (published by the Power thread) and show it
+            # in the window: green normally, bold red when low.
+            self.batt_timer = QTimer(self)
+            self.batt_timer.timeout.connect(self._update_battery_label)
+            self.batt_timer.start(1500)
         
         if self.start_tcp:
             self.TCP_Server.StartTcpServer()
@@ -50,6 +55,19 @@ class mywindow(QMainWindow,Ui_server_ui):
                 self.label.setText("Server On")
                 self.Button_Server.setText("Off")
                 
+    def _update_battery_label(self):
+        """Show the latest battery voltage in the window (red+bold when low)."""
+        voltage = getattr(self.TCP_Server, "last_battery", 0)
+        if voltage < 3:
+            self.label_battery.setText("Battery: no power")
+            self.label_battery.setStyleSheet("background:transparent;border:none;color:#9aa0a8;")
+        elif voltage < 7.0:
+            self.label_battery.setText("Battery: %.2f V  -  LOW" % voltage)
+            self.label_battery.setStyleSheet("background:transparent;border:none;color:#e02d2d;font-weight:bold;")
+        else:
+            self.label_battery.setText("Battery: %.2f V" % voltage)
+            self.label_battery.setStyleSheet("background:transparent;border:none;color:#21c46a;")
+
     def windowMinimumed(self):
         self.showMinimized()
     def mousePressEvent(self, event):
