@@ -37,6 +37,7 @@ class Server:
         self.Mode = 'one'
         self.endChar='\n'
         self.intervalChar='#'
+        self.last_battery = 0     # latest battery voltage, published by Power()
     def get_interface_ip(self):
         # Find the Pi's primary LAN IP for display, without assuming an
         # interface name. (The old code was hard-coded to wlan0 and failed on
@@ -329,6 +330,9 @@ class Server:
     def Power(self):
         while True:
             ADC_Power=self.adc.recvADC(2)*3
+            # Publish the latest reading so the GUI can show it without touching
+            # the I2C bus from another thread (a plain attribute read is safe).
+            self.last_battery = ADC_Power
             time.sleep(3)
             if ADC_Power < 3:
                 # A reading near 0 V means the battery is switched off or simply
@@ -336,12 +340,14 @@ class Server:
                 # instead of beeping continuously.
                 self.buzzer.run('0')
             elif ADC_Power < 6.8:
+                print("WARNING: battery critically low (%.2f V) - charge now!" % ADC_Power)
                 for i in range(4):
                     self.buzzer.run('1')
                     time.sleep(0.1)
                     self.buzzer.run('0')
                     time.sleep(0.1)
             elif ADC_Power< 7:
+                print("WARNING: battery low (%.2f V)" % ADC_Power)
                 for i in range(2):
                     self.buzzer.run('1')
                     time.sleep(0.1)
