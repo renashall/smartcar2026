@@ -46,11 +46,10 @@ files so student work never collides with the kit's source:
 - `user.md` — notes for the folder.
 
 ### `Code/Modules/` — new folder
-Shared modules the lesson scripts import (via `car_setup.py`):
+Machine-learning / image helpers for the advanced lessons. The car driver
+modules (motor, led, servo, adc, …) live in `Code/Server/`; the lessons import
+them from there via `car_setup.py`.
 
-- `SmartCarModules/` — the car driver modules: `Motor.py`, `Led.py`, `Buzzer.py`,
-  `servo.py`, `Ultrasonic.py`, `Line_Tracking.py`, `ADC.py`, `Thread.py`, `Light.py`,
-  `Command.py`, `PCA9685.py`, `audio.py`.
 - `aicode101/` — machine-learning helpers: `predict.py`, `aicode101_img_utils.py`, and a
   `model/` directory.
 - `utils/` — `haarcascade_frontalface_default.xml`, a MobileNet V2 TFLite feature model,

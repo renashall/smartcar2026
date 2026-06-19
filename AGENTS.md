@@ -16,8 +16,8 @@ See `CHANGES.md` for the full list of additions.
   `server.py`). Runs on the Raspberry Pi. **Preserved Freenove code** — avoid
   editing unless necessary.
 - `Code/Client/` — Freenove desktop client (PyQt5). Preserved Freenove code.
-- `Code/Modules/` — shared modules for course lessons (`SmartCarModules/`,
-  `aicode101/`, `utils/`).
+- `Code/Modules/` — ML / image helpers for advanced lessons (`aicode101/`,
+  `utils/`). The car driver modules live in `Code/Server/`.
 - `Code/User/` — **course lesson scripts** (the primary place for new work).
   Keep student/course code here, separate from the Freenove source.
 - `Code/Patch/`, `Datasheet/`, `Picture/`, `Resources/` — assets and patches.
