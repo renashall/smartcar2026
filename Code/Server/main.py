@@ -23,8 +23,11 @@ class mywindow(QMainWindow,Ui_server_ui):
         self.parseOpt()
         if self.user_ui:
             self.app = QApplication(sys.argv)
+            self.app.setApplicationName("SERVER")
+            self.app.setApplicationDisplayName("SERVER")
             super(mywindow,self).__init__()
             self.setupUi(self)
+            self.setWindowTitle("SERVER")
             self.m_DragPosition=self.pos()
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
             self.setMouseTracking(True)
