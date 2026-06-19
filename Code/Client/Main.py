@@ -594,8 +594,21 @@ class mywindow(QMainWindow,Ui_Client):
             elif kind == cmd.CMD_LIGHT:
                 self.Light.setText("Left:" + fields[0] + 'V' + ' ' + "Right:" + fields[1] + 'V')
             elif kind == cmd.CMD_POWER:
-                percent_power = int((float(fields[0]) - 7) / 1.40 * 100)
-                self.progress_Power.setValue(max(0, min(100, percent_power)))
+                percent_power = max(0, min(100, int((float(fields[0]) - 7) / 1.40 * 100)))
+                self.progress_Power.setValue(percent_power)
+                if percent_power <= 20:
+                    # Low-battery notification: red bar + warning text.
+                    self.progress_Power.setFormat("LOW BATTERY  %p%")
+                    self.progress_Power.setStyleSheet(
+                        "QProgressBar{border:1px solid #3a3f47;border-radius:4px;"
+                        "text-align:center;color:#ffffff;background:#15181d;}"
+                        "QProgressBar::chunk{background:#e02d2d;border-radius:3px;}")
+                else:
+                    self.progress_Power.setFormat("%p%")
+                    self.progress_Power.setStyleSheet(
+                        "QProgressBar{border:1px solid #3a3f47;border-radius:4px;"
+                        "text-align:center;color:#e8eaed;background:#15181d;}"
+                        "QProgressBar::chunk{background:#00c2a3;border-radius:3px;}")
         except (IndexError, ValueError):
             pass
     def is_valid_jpg(self,jpg_file):
