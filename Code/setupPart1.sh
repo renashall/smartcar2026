@@ -7,16 +7,14 @@ find_package_dir() {
   current_dir="$SCRIPT_DIR"
 
   while [ "$current_dir" != "/" ]; do
-    if [ -f "$current_dir/Code/build.sh" ] &&
-      [ -f "$current_dir/Code/setup.py" ] &&
+    if [ -f "$current_dir/Code/Server/main.py" ] &&
       [ -f "$current_dir/Code/Patch/patch_for_bullseye.sh" ]; then
       PACKAGE_DIR="$current_dir"
       return
     fi
 
     if [ "$(basename "$current_dir")" = "Code" ] &&
-      [ -f "$current_dir/build.sh" ] &&
-      [ -f "$current_dir/setup.py" ] &&
+      [ -f "$current_dir/Server/main.py" ] &&
       [ -f "$current_dir/Patch/patch_for_bullseye.sh" ]; then
       PACKAGE_DIR="$(dirname "$current_dir")"
       return

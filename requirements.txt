@@ -1,13 +1,17 @@
 # Python packages for the "Machine Learning with Raspberry Pi & Smart Car" course.
 #
-# Install with:
+# Easiest install (laptop/desktop): run the helper in the repo root, which makes
+# a .venv and installs everything below into it:
+#     python setup.py        # Windows
+#     python3 setup.py       # macOS / Linux
+#
+# Or install straight into your current environment with:
 #     pip install -r requirements.txt
 #
-# Works on Windows, macOS, Linux, and the Raspberry Pi. You only need these on
-# whichever machine runs the lesson programs (camera viewer, face detection,
-# GUI). On the Pi, setupPart1.sh and setupPart2.sh already install them for you;
-# run this command yourself only on a separate computer (or if setup was
-# skipped).
+# You only need these on whichever machine runs the lesson programs (camera
+# viewer, face detection, GUI). On the Pi, Code/setupPart1.sh and
+# Code/setupPart2.sh already install them for you; install here yourself only on
+# a separate computer (or if Pi setup was skipped).
 #
 # No terminal? In Thonny use Tools -> Manage Packages and install each name below.
 
@@ -19,9 +23,9 @@ PyQt5            # the GUI window for the client and Lesson 11
 # --- Raspberry Pi only: car hardware libraries ---
 # These control GPIO, the camera, the LED strip, and the I2C/ADC board. They
 # only install on a Raspberry Pi, so they are left commented out here. On the Pi
-# they are installed by setupPart1.sh / setupPart2.sh (apt + the Freenove
-# build), not by this file. Uncomment them only if you are setting up a Pi by
-# hand without the setup scripts.
+# they are installed by Code/setupPart1.sh / Code/setupPart2.sh (apt, plus the
+# WS281x LED driver), not by this file. Uncomment them only if you are setting up
+# a Pi by hand without the setup scripts.
 #
 # RPi.GPIO       # GPIO pins (motors, buzzer, ultrasonic, line sensors)
 # rpi_ws281x     # the addressable LED strip
