@@ -19,6 +19,34 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import * 
+
+VIDEO_UNAVAILABLE_TEXT = "NO VIDEO AVAILABLE"
+VIDEO_UNAVAILABLE_STYLE = (
+    "background:#000000;"
+    "border:1px solid #15181d;"
+    "border-radius:7px;"
+    "color:#e8eaed;"
+    "font-size:22px;"
+    "font-weight:bold;"
+)
+BATTERY_PROGRESS_STYLE = (
+    "QProgressBar{border:1px solid #3a3f47;border-radius:4px;"
+    "text-align:center;color:#ffffff;background:#15181d;}"
+    "QProgressBar::chunk{background:%s;border-radius:3px;}"
+)
+CONNECTED_STYLE = (
+    "background:#15181d;border:1px solid #21c46a;border-radius:7px;"
+    "color:#21c46a;font-weight:bold;"
+)
+DISCONNECTED_STYLE = (
+    "background:#15181d;border:1px solid #3a3f47;border-radius:7px;"
+    "color:#e02d2d;font-weight:bold;"
+)
+VOLTAGE_NORMAL_STYLE = "background:transparent;border:none;color:#21c46a;font-weight:bold;"
+VOLTAGE_LOW_STYLE = "background:transparent;border:none;color:#e02d2d;font-weight:bold;"
+VOLTAGE_UNKNOWN_STYLE = "background:transparent;border:none;color:#9aa0a8;font-weight:bold;"
+CONNECTION_STATUS_KIND = "__CONNECTION_STATUS__"
+
 class mywindow(QMainWindow,Ui_Client):
     # Sensor readings arrive on a background socket thread. Updating Qt widgets
     # off the GUI thread crashes PyQt intermittently, so the receive thread emits
@@ -29,6 +57,7 @@ class mywindow(QMainWindow,Ui_Client):
         global timer
         super(mywindow,self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("CLIENT")
         self.sensor_signal.connect(self._update_sensor_ui)
         self.endChar='\n'
         self.intervalChar='#'
@@ -49,10 +78,15 @@ class mywindow(QMainWindow,Ui_Client):
         self.setFocusPolicy(Qt.StrongFocus)
         self.progress_Power.setMinimum(0)
         self.progress_Power.setMaximum(100)
+        self.progress_Power.setFormat("%p%")
+        self.progress_Power.setStyleSheet(BATTERY_PROGRESS_STYLE % "#00c2a3")
+        self.set_connected_status(False)
+        self.set_battery_voltage(None)
         self.name.setAlignment(QtCore.Qt.AlignCenter)
         self.label_Servo1.setText('90')
         self.label_Servo2.setText('90')
         self.label_Video.setAlignment(QtCore.Qt.AlignCenter|QtCore.Qt.AlignVCenter)
+        self.show_no_video()
         self.label_Servo1.setAlignment(QtCore.Qt.AlignCenter|QtCore.Qt.AlignVCenter)
         self.label_Servo2.setAlignment(QtCore.Qt.AlignCenter|QtCore.Qt.AlignVCenter)
         
@@ -332,6 +366,7 @@ class mywindow(QMainWindow,Ui_Client):
         elif self.Btn_Video.text()=='Close Video':
             self.timer.stop()
             self.Btn_Video.setText('Open Video')
+            self.show_no_video()
     def on_btn_Up(self):
         self.servo2=self.servo2+10
         if self.servo2>=180:
@@ -535,6 +570,9 @@ class mywindow(QMainWindow,Ui_Client):
             except:
                 pass
             self.TCP.StopTcpcClient()
+            self.set_connected_status(False)
+            self.set_battery_voltage(None)
+            self.show_no_video()
 
 
     def close(self):
@@ -545,6 +583,8 @@ class mywindow(QMainWindow,Ui_Client):
         except:
             pass
         self.TCP.StopTcpcClient()
+        self.set_connected_status(False)
+        self.set_battery_voltage(None)
         try:
             os.remove("video.jpg")
         except:
@@ -561,6 +601,11 @@ class mywindow(QMainWindow,Ui_Client):
                 break
     def recvmassage(self):
             self.TCP.socket1_connect(self.h)
+            if self.TCP.connect_Flag:
+                self.sensor_signal.emit(CONNECTION_STATUS_KIND, ["online"])
+            else:
+                self.sensor_signal.emit(CONNECTION_STATUS_KIND, ["offline"])
+                return
             self.power=Thread(target=self.Power)
             self.power.start()
             restCmd=""
@@ -585,38 +630,63 @@ class mywindow(QMainWindow,Ui_Client):
                         self.sensor_signal.emit(cmd.CMD_LIGHT, Massage[1:])
                     elif cmd.CMD_POWER in Massage:
                         self.sensor_signal.emit(cmd.CMD_POWER, Massage[1:])
+            self.sensor_signal.emit(CONNECTION_STATUS_KIND, ["offline"])
 
     def _update_sensor_ui(self, kind, fields):
         """Runs on the GUI thread (via sensor_signal) to update sensor widgets."""
         try:
-            if kind == cmd.CMD_SONIC:
+            if kind == CONNECTION_STATUS_KIND:
+                connected = fields and fields[0] == "online"
+                self.set_connected_status(connected)
+                if not connected:
+                    self.Btn_Connect.setText("Connect")
+                    self.set_battery_voltage(None)
+            elif kind == cmd.CMD_SONIC:
                 self.Ultrasonic.setText('Obstruction:%s cm' % fields[0])
             elif kind == cmd.CMD_LIGHT:
                 self.Light.setText("Left:" + fields[0] + 'V' + ' ' + "Right:" + fields[1] + 'V')
             elif kind == cmd.CMD_POWER:
-                percent_power = max(0, min(100, int((float(fields[0]) - 7) / 1.40 * 100)))
+                voltage = float(fields[0])
+                percent_power = max(0, min(100, int((voltage - 7) / 1.40 * 100)))
                 self.progress_Power.setValue(percent_power)
+                self.set_battery_voltage(voltage, percent_power <= 20)
                 if percent_power <= 20:
-                    # Low-battery notification: red bar + warning text.
-                    self.progress_Power.setFormat("LOW BATTERY  %p%")
-                    self.progress_Power.setStyleSheet(
-                        "QProgressBar{border:1px solid #3a3f47;border-radius:4px;"
-                        "text-align:center;color:#ffffff;background:#15181d;}"
-                        "QProgressBar::chunk{background:#e02d2d;border-radius:3px;}")
+                    self.progress_Power.setFormat("%p%")
+                    self.progress_Power.setStyleSheet(BATTERY_PROGRESS_STYLE % "#e02d2d")
                 else:
                     self.progress_Power.setFormat("%p%")
-                    self.progress_Power.setStyleSheet(
-                        "QProgressBar{border:1px solid #3a3f47;border-radius:4px;"
-                        "text-align:center;color:#e8eaed;background:#15181d;}"
-                        "QProgressBar::chunk{background:#00c2a3;border-radius:3px;}")
+                    self.progress_Power.setStyleSheet(BATTERY_PROGRESS_STYLE % "#00c2a3")
         except (IndexError, ValueError):
             pass
+    def set_connected_status(self, connected):
+        if connected:
+            self.label_Status.setText("ONLINE")
+            self.label_Status.setStyleSheet(CONNECTED_STYLE)
+        else:
+            self.label_Status.setText("OFFLINE")
+            self.label_Status.setStyleSheet(DISCONNECTED_STYLE)
+
+    def set_battery_voltage(self, voltage, low=False):
+        if voltage is None:
+            self.progress_Power.setValue(0)
+            self.label_BatteryVoltage.setText("-- V")
+            self.label_BatteryVoltage.setStyleSheet(VOLTAGE_UNKNOWN_STYLE)
+        else:
+            self.label_BatteryVoltage.setText("%.2f V" % voltage)
+            self.label_BatteryVoltage.setStyleSheet(VOLTAGE_LOW_STYLE if low else VOLTAGE_NORMAL_STYLE)
+
+    def show_no_video(self):
+        self.label_Video.clear()
+        self.label_Video.setText(VIDEO_UNAVAILABLE_TEXT)
+        self.label_Video.setStyleSheet(VIDEO_UNAVAILABLE_STYLE)
+
     def is_valid_jpg(self,jpg_file):
+        bValid = False
         try:
-            bValid = True
             if jpg_file.split('.')[-1].lower() == 'jpg':  
                 with open(jpg_file, 'rb') as f:
                     buf=f.read()
+                    bValid = True
                     if not buf.startswith(b'\xff\xd8'):
                         bValid = False
                     elif buf[6:10] in (b'JFIF', b'Exif'):
@@ -628,9 +698,9 @@ class mywindow(QMainWindow,Ui_Client):
                         except:
                             bValid = False               
             else:  
-                return bValid
+                return True
         except:
-            pass
+            return False
         return bValid
 
     def Tracking_Face(self):
@@ -655,19 +725,24 @@ class mywindow(QMainWindow,Ui_Client):
         self.TCP.video_Flag=False
         try:
             if  self.is_valid_jpg('video.jpg'):
+                self.label_Video.setText("")
+                self.label_Video.setStyleSheet("background:#000000;border:1px solid #15181d;border-radius:7px;")
                 self.label_Video.setPixmap(QPixmap('video.jpg'))
                 if self.Btn_Tracking_Faces.text()=="Tracing-Off":
                         self.find_Face(self.TCP.face_x,self.TCP.face_y)
+            else:
+                self.show_no_video()
         except Exception as e:
             print(e)
+            self.show_no_video()
         self.TCP.video_Flag=True
         
             
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setApplicationName("CLIENT")
+    app.setApplicationDisplayName("CLIENT")
     myshow=mywindow()
     myshow.show();   
     sys.exit(app.exec_())
     
-
-

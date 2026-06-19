@@ -129,7 +129,9 @@ QSlider::handle:vertical:hover { background:#ffffff; }
         self.Btn_Video.setObjectName("Btn_Video")
         self.label_Video = QtWidgets.QLabel(Client)
         self.label_Video.setGeometry(QtCore.QRect(1, 42, 400, 300))
-        self.label_Video.setText("")
+        self.label_Video.setStyleSheet("background:#000000;border:1px solid #15181d;border-radius:7px;color:#e8eaed;font-size:22px;font-weight:bold;")
+        self.label_Video.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_Video.setText("NO VIDEO AVAILABLE")
         self.label_Video.setObjectName("label_Video")
         self.Btn_Down = QtWidgets.QPushButton(Client)
         self.Btn_Down.setGeometry(QtCore.QRect(510, 490, 75, 30))
@@ -196,6 +198,15 @@ QSlider::handle:vertical:hover { background:#ffffff; }
         font.setPointSize(10)
         self.Btn_Connect.setFont(font)
         self.Btn_Connect.setObjectName("Btn_Connect")
+        self.label_Status = QtWidgets.QLabel(Client)
+        self.label_Status.setGeometry(QtCore.QRect(220, 357, 100, 18))
+        font = QtGui.QFont()
+        font.setFamily("3ds")
+        font.setPointSize(8)
+        self.label_Status.setFont(font)
+        self.label_Status.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_Status.setStyleSheet("background:#15181d;border:1px solid #3a3f47;border-radius:7px;color:#e02d2d;font-weight:bold;")
+        self.label_Status.setObjectName("label_Status")
         self.checkBox_Led1 = QtWidgets.QCheckBox(Client)
         self.checkBox_Led1.setGeometry(QtCore.QRect(420, 120, 91, 31))
         font = QtGui.QFont()
@@ -394,29 +405,24 @@ QSlider::handle:vertical:hover { background:#ffffff; }
         self.Servo2.setFont(font)
         self.Servo2.setObjectName("Servo2")
         self.progress_Power = QtWidgets.QProgressBar(Client)
-        self.progress_Power.setGeometry(QtCore.QRect(20, 560, 70, 30))
+        self.progress_Power.setGeometry(QtCore.QRect(10, 560, 55, 30))
         font = QtGui.QFont()
         font.setFamily("3ds")
         font.setPointSize(10)
         self.progress_Power.setFont(font)
-        self.progress_Power.setStyleSheet("QProgressBar {\n"
-"border: 2px solid grey;\n"
-"border-radius: 5px;\n"
-"background-color: #FFFFFF;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"background-color:#696969;\n"
-"width: 20px;\n"
-"}\n"
-"\n"
-"QProgressBar {\n"
-"text-align: center; \n"
-"color: rgb(152,251,152);\n"
-"}\n"
-"")
+        self.progress_Power.setStyleSheet("QProgressBar{border:1px solid #3a3f47;border-radius:4px;text-align:center;color:#ffffff;background:#15181d;}QProgressBar::chunk{background:#00c2a3;border-radius:3px;}")
+        self.progress_Power.setFormat("%p%")
         self.progress_Power.setProperty("value", 0)
         self.progress_Power.setObjectName("progress_Power")
+        self.label_BatteryVoltage = QtWidgets.QLabel(Client)
+        self.label_BatteryVoltage.setGeometry(QtCore.QRect(67, 560, 50, 30))
+        font = QtGui.QFont()
+        font.setFamily("3ds")
+        font.setPointSize(9)
+        self.label_BatteryVoltage.setFont(font)
+        self.label_BatteryVoltage.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_BatteryVoltage.setStyleSheet("background:transparent;border:none;color:#9aa0a8;font-weight:bold;")
+        self.label_BatteryVoltage.setObjectName("label_BatteryVoltage")
         self.Btn_Buzzer = QtWidgets.QPushButton(Client)
         self.Btn_Buzzer.setGeometry(QtCore.QRect(120, 510, 90, 30))
         font = QtGui.QFont()
@@ -482,7 +488,7 @@ QSlider::handle:vertical:hover { background:#ffffff; }
 
     def retranslateUi(self, Client):
         _translate = QtCore.QCoreApplication.translate
-        Client.setWindowTitle(_translate("Client", "freenove"))
+        Client.setWindowTitle(_translate("Client", "CLIENT"))
         self.Btn_ForWard.setText(_translate("Client", "Forward"))
         self.name.setText(_translate("Client", "FREENOVE"))
         self.Btn_Turn_Left.setText(_translate("Client", "Turn Left"))
@@ -498,6 +504,7 @@ QSlider::handle:vertical:hover { background:#ffffff; }
         self.IP.setPlaceholderText(_translate("Client", "0.0.0.0"))
         self.label_IP.setText(_translate("Client", "IP Address"))
         self.Btn_Connect.setText(_translate("Client", "Connect"))
+        self.label_Status.setText(_translate("Client", "OFFLINE"))
         self.checkBox_Led1.setText(_translate("Client", "Led1"))
         self.label_Servo2.setText(_translate("Client", "0"))
         self.checkBox_Led2.setText(_translate("Client", "Led2"))
@@ -532,4 +539,4 @@ QSlider::handle:vertical:hover { background:#ffffff; }
         self.Btn_Tracking_Faces.setText(_translate("Client", "Tracing-On"))
         self.Ultrasonic.setText(_translate("Client", "Ultrasonic"))
         self.Light.setText(_translate("Client", "Light"))
-
+        self.label_BatteryVoltage.setText(_translate("Client", "-- V"))

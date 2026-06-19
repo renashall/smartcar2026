@@ -110,7 +110,7 @@ QSlider::handle:vertical:hover { background:#ffffff; }
 
     def retranslateUi(self, server_ui):
         _translate = QtCore.QCoreApplication.translate
-        server_ui.setWindowTitle(_translate("server_ui", "Form"))
+        server_ui.setWindowTitle(_translate("server_ui", "SERVER"))
         self.label.setText(_translate("server_ui", "Server Off"))
         self.label_ip.setText(_translate("server_ui", "IP: ..."))
         self.label_battery.setText(_translate("server_ui", "Battery: --"))
@@ -118,4 +118,3 @@ QSlider::handle:vertical:hover { background:#ffffff; }
         self.label_2.setText(_translate("server_ui", "FREENOVE"))
         self.pushButton_Close.setText(_translate("server_ui", "×"))
         self.pushButton_Min.setText(_translate("server_ui", "-"))
-
