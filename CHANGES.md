@@ -5,7 +5,7 @@ and has been adapted by **AI Code Academy** for the course *"Machine Learning wi
 Raspberry Pi & Smart Car."* The original Freenove project files are preserved; this
 document records what has been **added, changed, or reorganized** on top of them.
 
-_Last updated: 2026-06-03_
+_Last updated: 2026-06-19_
 
 ---
 
@@ -20,18 +20,32 @@ Raspberry Pi with `pip install -r requirements.txt`:
   are listed as comments — they only install on the Pi and are handled by the setup
   scripts, so `pip` on a laptop won't choke on them.
 
-### `setupPart1.sh` and `setupPart2.sh` (repo root)
-A two-stage, mostly automated Raspberry Pi setup that replaces the manual steps. Both
-scripts prompt for the Pi model and OS-image date, then reboot at the end.
+### `setup.py` (repo root) — cross-platform laptop/desktop installer
+A single Python script that replaces the old per-OS `Code/setup_macos.py` and
+`Code/setup_windows.py`. Run it with the system Python (`python setup.py` on Windows,
+`python3 setup.py` on macOS/Linux) and it:
+
+- detects the operating system (Windows / macOS / Linux);
+- creates a `.venv` virtual environment in the repo root (reused if present, or
+  rebuilt with `--force`); and
+- installs the packages from `requirements.txt` into that `.venv`.
+
+It needs no administrator/`sudo` (it only writes a project-local `.venv`), prints the
+OS-specific activation command when it finishes, and prints manual fallback commands if
+a step fails. It detects a Raspberry Pi and points the user at the setup scripts instead
+(a `.venv` would hide the Pi's apt-installed system packages); `--pi` overrides this.
+
+### `Code/setupPart1.sh` and `Code/setupPart2.sh`
+A two-stage, automated Raspberry Pi setup that replaces the manual steps. Both scripts
+auto-detect the Pi model, OS, and camera stack, then reboot at the end.
 
 - **`setupPart1.sh`** — enables SSH, VNC, and I2C; installs I2C tools, `python3-smbus`,
   and git; makes `python3` the default `python`; configures the camera interface; and
-  applies the Bullseye patch.
+  applies the Bullseye patch (only where the legacy camera stack needs it).
 - **`setupPart2.sh`** — updates the boot config for the camera; applies the audio
-  workaround for older Pi models; installs the car libraries (`Code/build.sh` +
-  `Code/setup.py`); and installs the course Python packages via `apt`
-  (`python3-numpy/opencv/pil/pyqt5/picamera`) with a `pip install -r requirements.txt`
-  fallback.
+  workaround for older Pi models; installs the addressable-LED (WS281x) driver; and
+  installs the course Python packages via `apt`
+  (`python3-numpy/opencv/pil/pyqt5/picamera2`).
 
 ### `Code/User/` — new folder
 Course lesson code, kept separate from the Freenove `Server` / `Client` / `Modules`
@@ -56,10 +70,11 @@ Documentation PDFs organized into one place:
 ## Changed
 
 ### `README.md` — rewritten for the course
-Added an AI Code Academy course note, full **Raspberry Pi setup** instructions for the
-two `setupPart` scripts, and a **"Where to Put Your Code"** section documenting
-`Code/User` and `car_setup.py`. The original Freenove Download / Support / Copyright /
-About sections are kept.
+Added an AI Code Academy course note, a **Computer (laptop/desktop) Setup** section for
+`setup.py`, full **Raspberry Pi setup** instructions for the two `Code/setupPart`
+scripts, and a **"Where to Put Your Code"** section documenting `Code/User` and
+`car_setup.py`. The original Freenove Download / Support / Copyright / About sections are
+kept.
 
 ### `Code/Client/Video.py` — face detection now runs on any platform
 Removed the platform guard in `face_detect()`:
@@ -78,9 +93,23 @@ and `lesson_11_camera_gui.py` — were written without that restriction for the 
 
 ---
 
+## Removed / moved
+
+- **`Code/setup_macos.py` and `Code/setup_windows.py`** — the two per-OS pip installers
+  were replaced by the single cross-platform `setup.py` in the repo root (see *Added*).
+- **`Code/build.sh` and `Code/setup.py`** (the Freenove Pi build helpers) — removed.
+  The only car-specific step they performed (installing the WS281x LED driver) is now
+  done inline by `setupPart2.sh`; making `python3` the default and installing
+  `python3-pyqt5` were already handled by the `setupPart` scripts.
+- **`setupPart1.sh` / `setupPart2.sh`** — moved from the repo root into `Code/` and
+  updated to locate the project by `Code/Server/main.py` instead of the removed
+  `build.sh` / `setup.py`.
+
+---
+
 ## Preserved from Freenove
 
 The rest of the original Freenove project remains in place, including `Code/Server/`,
-`Code/Client/` (apart from `Video.py` above), `Code/Patch/`, `Code/build.sh`,
-`Code/setup.py`, `Datasheet/`, and `Picture/`. All original files stay under Freenove's
+`Code/Client/` (apart from `Video.py` above), `Code/Patch/`, `Datasheet/`, and
+`Picture/`. All original files stay under Freenove's
 [Creative Commons BY-NC-SA 3.0](http://creativecommons.org/licenses/by-nc-sa/3.0/) license.

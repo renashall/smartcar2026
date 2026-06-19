@@ -7,16 +7,14 @@ find_package_dir() {
   current_dir="$SCRIPT_DIR"
 
   while [ "$current_dir" != "/" ]; do
-    if [ -f "$current_dir/Code/build.sh" ] &&
-      [ -f "$current_dir/Code/setup.py" ] &&
+    if [ -f "$current_dir/Code/Server/main.py" ] &&
       [ -f "$current_dir/Code/Patch/patch_for_bullseye.sh" ]; then
       PACKAGE_DIR="$current_dir"
       return
     fi
 
     if [ "$(basename "$current_dir")" = "Code" ] &&
-      [ -f "$current_dir/build.sh" ] &&
-      [ -f "$current_dir/setup.py" ] &&
+      [ -f "$current_dir/Server/main.py" ] &&
       [ -f "$current_dir/Patch/patch_for_bullseye.sh" ]; then
       PACKAGE_DIR="$(dirname "$current_dir")"
       return
@@ -195,12 +193,23 @@ install_car_libraries() {
     exit 1
   fi
 
-  echo "Installing car libraries from $code_dir..."
-  (
-    cd "$code_dir"
-    sh ./build.sh
-    sudo python3 setup.py
-  )
+  # This used to run Code/build.sh + Code/setup.py. Those helper files were
+  # removed; the only car-specific thing they installed is the WS281x driver for
+  # the addressable LED strip, so install it directly here. (python3-pyqt5 and
+  # the other lesson packages are handled by install_course_python_packages.)
+  echo "Installing the addressable-LED (WS281x) driver used by the car..."
+  sudo apt-get install -y python3-dev || true
+
+  if sudo apt-get install -y python3-rpi-ws281x 2>/dev/null; then
+    echo "Installed rpi_ws281x from apt."
+  elif command -v pip3 >/dev/null 2>&1 &&
+    sudo pip3 install rpi_ws281x --break-system-packages; then
+    echo "Installed rpi_ws281x from pip."
+  else
+    echo "Could not install rpi_ws281x automatically."
+    echo "If the LED lessons fail, install it by hand with:"
+    echo "  sudo pip3 install rpi_ws281x --break-system-packages"
+  fi
 }
 
 install_course_python_packages() {

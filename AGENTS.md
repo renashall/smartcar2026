@@ -19,7 +19,11 @@ See `CHANGES.md` for the full list of additions.
 - `Code/User/` — **course lesson scripts** (the primary place for new work).
   Keep student/course code here, separate from the Freenove source.
 - `Code/Patch/`, `Datasheet/`, `Picture/`, `Resources/` — assets and patches.
-- `setupPart1.sh` / `setupPart2.sh` — two-stage Raspberry Pi setup.
+- `Code/setupPart1.sh` / `Code/setupPart2.sh` — two-stage Raspberry Pi setup
+  (they locate the repo via `Code/Server/main.py`).
+- `setup.py` (repo root) — cross-platform laptop/desktop installer: detects the
+  OS, creates `.venv` in the repo root, and installs `requirements.txt` into it.
+  Not for the Pi (it detects a Pi and defers to the `setupPart` scripts).
 - `requirements.txt` — laptop-installable Python deps (Pi-only libs are
   commented out so `pip` on a laptop won't choke).
 
