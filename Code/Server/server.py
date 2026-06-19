@@ -235,8 +235,6 @@ class Server:
                             data2=int(data[2])
                             data3=int(data[3])
                             data4=int(data[4])
-                            if data1==None or data2==None or data2==None or data3==None:
-                                continue
                             self.PWM.setMotorModel(data1,data2,data3,data4)
                         except:
                             pass
@@ -256,8 +254,6 @@ class Server:
                             data2=int(data[2])
                             data3=int(data[3])
                             data4=int(data[4])
-                            if data1==None or data2==None or data2==None or data3==None:
-                                continue
                             self.led.ledIndex(data1,data2,data3,data4)
                         except:
                             pass
