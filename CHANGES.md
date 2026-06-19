@@ -20,10 +20,10 @@ Raspberry Pi with `pip install -r requirements.txt`:
   are listed as comments — they only install on the Pi and are handled by the setup
   scripts, so `pip` on a laptop won't choke on them.
 
-### `setup.py` (repo root) — cross-platform laptop/desktop installer
+### `Code/setup.py` — cross-platform laptop/desktop installer
 A single Python script that replaces the old per-OS `Code/setup_macos.py` and
-`Code/setup_windows.py`. Run it with the system Python (`python setup.py` on Windows,
-`python3 setup.py` on macOS/Linux) and it:
+`Code/setup_windows.py`. Run it from the repo root with the system Python (`python Code/setup.py` on Windows,
+`python3 Code/setup.py` on macOS/Linux) and it:
 
 - detects the operating system (Windows / macOS / Linux);
 - creates a `.venv` virtual environment in the repo root (reused if present, or
@@ -71,7 +71,7 @@ Documentation PDFs organized into one place:
 
 ### `README.md` — rewritten for the course
 Added an AI Code Academy course note, a **Computer (laptop/desktop) Setup** section for
-`setup.py`, full **Raspberry Pi setup** instructions for the two `Code/setupPart`
+`Code/setup.py`, full **Raspberry Pi setup** instructions for the two `Code/setupPart`
 scripts, and a **"Where to Put Your Code"** section documenting `Code/User` and
 `car_setup.py`. The original Freenove Download / Support / Copyright / About sections are
 kept.
@@ -96,14 +96,14 @@ and `lesson_11_camera_gui.py` — were written without that restriction for the 
 ## Removed / moved
 
 - **`Code/setup_macos.py` and `Code/setup_windows.py`** — the two per-OS pip installers
-  were replaced by the single cross-platform `setup.py` in the repo root (see *Added*).
-- **`Code/build.sh` and `Code/setup.py`** (the Freenove Pi build helpers) — removed.
+  were replaced by the single cross-platform `Code/setup.py` (see *Added*).
+- **`Code/build.sh` and the original Freenove Pi-oriented `Code/setup.py` helper** — removed.
   The only car-specific step they performed (installing the WS281x LED driver) is now
   done inline by `setupPart2.sh`; making `python3` the default and installing
   `python3-pyqt5` were already handled by the `setupPart` scripts.
 - **`setupPart1.sh` / `setupPart2.sh`** — moved from the repo root into `Code/` and
   updated to locate the project by `Code/Server/main.py` instead of the removed
-  `build.sh` / `setup.py`.
+  `build.sh` / the original Freenove Pi setup helper.
 
 ---
 

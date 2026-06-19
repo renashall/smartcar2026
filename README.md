@@ -23,17 +23,17 @@
 
 ### Computer (laptop / desktop) Setup
 
-Lessons that only watch the camera or run the GUI (Lesson 6 client, 7, 8, 11) run on a regular Windows, macOS, or Linux computer. To set one up, run the cross-platform helper in the project root with your system Python:
+Lessons that only watch the camera or run the GUI (Lesson 6 client, 7, 8, 11) run on a regular Windows, macOS, or Linux computer. To set one up, run the cross-platform helper from the project root with your system Python:
 
 ```sh
 # Windows
-python setup.py
+python Code\setup.py
 
 # macOS / Linux
-python3 setup.py
+python3 Code/setup.py
 ```
 
-`setup.py` detects your operating system, creates a virtual environment named `.venv` in the project root, and installs the Python packages from `requirements.txt` into it. **No administrator or `sudo` is needed** — it only writes a `.venv` folder inside the project. If the virtual environment already exists it is reused; pass `--force` to rebuild it. If anything fails, the script prints the exact commands to finish by hand.
+`Code/setup.py` detects your operating system, creates a virtual environment named `.venv` in the project root, and installs the Python packages from `requirements.txt` into it. **No administrator or `sudo` is needed** — it only writes a `.venv` folder inside the project. If the virtual environment already exists it is reused; pass `--force` to rebuild it. If anything fails, the script prints the exact commands to finish by hand.
 
 When it finishes, activate the environment before running a lesson:
 
@@ -59,7 +59,7 @@ Run `deactivate` to leave the virtual environment when you are done.
 
 ### Raspberry Pi Setup
 
-The Raspberry Pi needs system packages (camera, GPIO, the LED driver) that a `.venv` would hide, so on the Pi use the two setup scripts in the `Code` folder instead of `setup.py`. After downloading this repository on your Raspberry Pi, open a terminal in the project folder and run them in order.
+The Raspberry Pi needs system packages (camera, GPIO, the LED driver) that a `.venv` would hide, so on the Pi use the two setup scripts in the `Code` folder instead of `Code/setup.py`. After downloading this repository on your Raspberry Pi, open a terminal in the project folder and run them in order.
 
 ```sh
 cd smartcar2026/Code
