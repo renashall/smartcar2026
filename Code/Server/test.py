@@ -1,5 +1,5 @@
 import time
-from Led import *
+from led import *
 led=Led()
 def test_Led():
     try:
@@ -21,7 +21,7 @@ def test_Led():
 
         
         
-from Motor import *            
+from motor import *            
 PWM=Motor()          
 def test_Motor(): 
     try:
@@ -44,7 +44,7 @@ def test_Motor():
         print ("\nEnd of program")
 
 
-from Ultrasonic import *
+from ultrasonic import *
 ultrasonic=Ultrasonic()                
 def test_Ultrasonic():
     try:
@@ -56,7 +56,7 @@ def test_Ultrasonic():
         print ("\nEnd of program")
 
 
-from Line_Tracking import *
+from line_tracking import *
 line=Line_Tracking()
 def test_Infrared():
     try:
@@ -94,7 +94,7 @@ def test_Servo():
         print ("\nEnd of program")
         
         
-from ADC import *
+from adc import *
 adc=Adc()
 def test_Adc():
     try:
@@ -110,7 +110,7 @@ def test_Adc():
     except KeyboardInterrupt:
         print ("\nEnd of program")
 
-from Buzzer import *
+from buzzer import *
 buzzer=Buzzer()
 def test_Buzzer():
     try:

@@ -1,5 +1,8 @@
 import time
-from PCA9685 import PCA9685
+from SmartCarModules.pca9685 import PCA9685
+
+invert = True
+
 class Motor:
     def __init__(self):
         self.pwm = PCA9685(0x40, debug=True)
@@ -70,12 +73,17 @@ class Motor:
  
     def setMotorModel(self,duty1,duty2,duty3,duty4):
         duty1,duty2,duty3,duty4=self.duty_range(duty1,duty2,duty3,duty4)
-        self.left_Upper_Wheel(duty1)
-        self.left_Lower_Wheel(duty2)
-        self.right_Upper_Wheel(duty3)
-        self.right_Lower_Wheel(duty4)
+        
+        if invert:
+            direction = -1
+        else:
+            direction = 1
             
-            
+        self.left_Upper_Wheel(direction * duty1)
+        self.left_Lower_Wheel(direction * duty2)
+        self.right_Upper_Wheel(direction * duty3)
+        self.right_Lower_Wheel(direction * duty4)
+                    
 PWM=Motor()          
 def loop(): 
     PWM.setMotorModel(2000,2000,2000,2000)       #Forward

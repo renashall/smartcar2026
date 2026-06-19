@@ -13,10 +13,10 @@ import car_setup          # adds the car's code folders to the import path
 import time
 
 # Bring in the parts we control in this lesson.
-from Motor import Motor       # the four driving wheels
-from Buzzer import Buzzer     # the beeper
-from Led import Led           # the LED lights
-from Command import COMMAND   # the list of command names the car understands
+from motor import Motor       # the four driving wheels
+from buzzer import Buzzer     # the beeper
+from led import Led           # the LED lights
+from command import COMMAND   # the list of command names the car understands
 
 # ---- settings you can change ----
 # Motor power goes from 0 (stopped) up to 4095 (full speed). 1500 is gentle.

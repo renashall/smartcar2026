@@ -8,18 +8,18 @@ from picamera2 import Picamera2   # libcamera-based camera library (Bullseye/Boo
 import fcntl
 import  sys
 import threading
-from Motor import *
+from motor import *
 from servo import *
-from Led import *
-from Buzzer import *
-from ADC import *
-from Thread import *
-from Light import *
-from Ultrasonic import *
-from Line_Tracking import *
+from led import *
+from buzzer import *
+from adc import *
+from thread import *
+from light import *
+from ultrasonic import *
+from line_tracking import *
 from threading import Timer
 from threading import Thread
-from Command import COMMAND as cmd
+from command import COMMAND as cmd
 
 class Server:   
     def __init__(self):

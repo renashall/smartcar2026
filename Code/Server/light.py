@@ -1,6 +1,6 @@
 import time
-from Motor import *
-from ADC import *
+from motor import *
+from adc import *
 class Light:
     def run(self):
         try:
