@@ -4,7 +4,7 @@ import socket
 import struct
 import time
 import sys,getopt
-from Thread import *
+from thread import *
 from threading import Thread
 from server import Server
 from server_ui import Ui_server_ui

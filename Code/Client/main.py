@@ -11,10 +11,10 @@ import sys
 from threading import Timer
 from threading import Thread
 from PIL import Image
-from Command import COMMAND as cmd
-from Thread import *
-from Client_Ui import Ui_Client
-from Video import *
+from command import COMMAND as cmd
+from thread import *
+from client_ui import Ui_Client
+from video import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
