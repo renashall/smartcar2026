@@ -21,26 +21,62 @@
 
 > If you meet any difficulties, please contact our support team for help.
 
-### Raspberry Pi Setup
+### Computer (laptop / desktop) Setup
 
-After downloading this repository on your Raspberry Pi, open a terminal in the project folder and run the setup scripts in order.
+Lessons that only watch the camera or run the GUI (Lesson 6 client, 7, 8, 11) run on a regular Windows, macOS, or Linux computer. To set one up, run the cross-platform helper in the project root with your system Python:
 
 ```sh
-cd smartcar2026
+# Windows
+python setup.py
+
+# macOS / Linux
+python3 setup.py
+```
+
+`setup.py` detects your operating system, creates a virtual environment named `.venv` in the project root, and installs the Python packages from `requirements.txt` into it. **No administrator or `sudo` is needed** — it only writes a `.venv` folder inside the project. If the virtual environment already exists it is reused; pass `--force` to rebuild it. If anything fails, the script prints the exact commands to finish by hand.
+
+When it finishes, activate the environment before running a lesson:
+
+```powershell
+# Windows (PowerShell)
+.\.venv\Scripts\Activate.ps1
+python Code\User\lesson_7_face_tracking.py <PI_IP>
+```
+
+If PowerShell blocks the activation script, allow it once for your user and try again:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+```sh
+# macOS / Linux
+source .venv/bin/activate
+python3 Code/User/lesson_7_face_tracking.py <PI_IP>
+```
+
+Run `deactivate` to leave the virtual environment when you are done.
+
+### Raspberry Pi Setup
+
+The Raspberry Pi needs system packages (camera, GPIO, the LED driver) that a `.venv` would hide, so on the Pi use the two setup scripts in the `Code` folder instead of `setup.py`. After downloading this repository on your Raspberry Pi, open a terminal in the project folder and run them in order.
+
+```sh
+cd smartcar2026/Code
 chmod +x setupPart1.sh setupPart2.sh
 ./setupPart1.sh
 ```
 
-`setupPart1.sh` enables the required Raspberry Pi interfaces, checks the Python command, installs basic I2C support, and applies the Bullseye patch. The script will ask about your Raspberry Pi model and Raspberry Pi OS image date, then prompt you to reboot.
+`setupPart1.sh` enables the required Raspberry Pi interfaces, makes `python3` the default `python`, installs basic I2C support, and applies the Bullseye patch where needed. It auto-detects your Raspberry Pi model and OS, then prompts you to reboot.
 
-After the Raspberry Pi reboots, return to the project folder and run the second setup script:
+After the Raspberry Pi reboots, return to the `Code` folder and run the second setup script:
 
 ```sh
-cd smartcar2026
+cd smartcar2026/Code
 ./setupPart2.sh
 ```
 
-`setupPart2.sh` updates the Raspberry Pi boot configuration for the camera, applies the audio workaround needed by older Raspberry Pi models, installs the car libraries from the `Code` folder, and then prompts you to reboot again.
+`setupPart2.sh` updates the Raspberry Pi boot configuration for the camera, applies the audio workaround needed by older Raspberry Pi models, installs the addressable-LED (WS281x) driver and the course Python packages, and then prompts you to reboot again.
 
 ### Where to Put Your Code
 
