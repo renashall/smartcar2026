@@ -111,7 +111,19 @@ print_detection() {
 
 run_raspi_config() {
   if command -v raspi-config >/dev/null 2>&1; then
-    sudo raspi-config nonint "$@" || true
+    set +e
+    sudo raspi-config nonint "$@"
+    status="$?"
+    set -e
+
+    if [ "$status" -eq 130 ]; then
+      echo "Interrupted while running raspi-config $*."
+      exit 130
+    fi
+
+    if [ "$status" -ne 0 ]; then
+      echo "raspi-config $* failed or is unsupported on this OS; continuing."
+    fi
   else
     echo "raspi-config was not found; skipping raspi-config $*"
   fi
@@ -144,9 +156,9 @@ ensure_interface_enabled() {
 }
 
 # A headless Pi has no monitor, so after a reboot the VNC server has no display
-# to share and RealVNC shows "Cannot currently show the desktop". Booting into
-# the desktop and giving VNC a virtual screen resolution fixes this. Both are
-# plain raspi-config calls, so no manual config.txt editing is needed.
+# to share and RealVNC shows "Cannot currently show the desktop". Configure the
+# desktop backend and virtual screen only through raspi-config so the OS owns
+# the underlying VNC/session files.
 configure_headless_vnc() {
   echo
   echo "Setting up the desktop and a virtual screen so VNC works without a monitor..."
@@ -169,11 +181,6 @@ configure_headless_vnc() {
   # Give the VNC server a virtual screen resolution to use when no monitor is
   # attached. Ignored on OS versions that do not support it.
   run_raspi_config do_vnc_resolution 1280x720
-
-  # Apply the changes now by restarting whichever VNC service is installed; they
-  # also take effect on the next reboot.
-  sudo systemctl restart vncserver-x11-serviced.service >/dev/null 2>&1 || true
-  sudo systemctl restart wayvnc.service >/dev/null 2>&1 || true
 }
 
 enable_interfaces() {
@@ -184,7 +191,6 @@ enable_interfaces() {
   ensure_interface_enabled "I2C" get_i2c do_i2c
 
   sudo systemctl enable --now ssh >/dev/null 2>&1 || true
-  sudo systemctl enable --now vncserver-x11-serviced.service >/dev/null 2>&1 || true
 
   echo "Installing I2C tools and Python SMBus support..."
   sudo apt-get update

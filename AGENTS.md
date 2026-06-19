@@ -21,8 +21,8 @@ See `CHANGES.md` for the full list of additions.
 - `Code/Patch/`, `Datasheet/`, `Picture/`, `Resources/` — assets and patches.
 - `Code/setupPart1.sh` / `Code/setupPart2.sh` — two-stage Raspberry Pi setup
   (they locate the repo via `Code/Server/main.py`).
-- `setup.py` (repo root) — cross-platform laptop/desktop installer: detects the
-  OS, creates `.venv` in the repo root, and installs `requirements.txt` into it.
+- `Code/setup.py` — cross-platform laptop/desktop installer: detects the
+  OS, creates `.venv` in the repo root, and installs root `requirements.txt` into it.
   Not for the Pi (it detects a Pi and defers to the `setupPart` scripts).
 - `requirements.txt` — laptop-installable Python deps (Pi-only libs are
   commented out so `pip` on a laptop won't choke).

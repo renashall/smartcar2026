@@ -1,9 +1,9 @@
 # Python packages for the "Machine Learning with Raspberry Pi & Smart Car" course.
 #
-# Easiest install (laptop/desktop): run the helper in the repo root, which makes
-# a .venv and installs everything below into it:
-#     python setup.py        # Windows
-#     python3 setup.py       # macOS / Linux
+# Easiest install (laptop/desktop): from the repo root, run the helper in Code/.
+# It makes a .venv in the repo root and installs everything below into it:
+#     python Code\setup.py        # Windows
+#     python3 Code/setup.py       # macOS / Linux
 #
 # Or install straight into your current environment with:
 #     pip install -r requirements.txt
