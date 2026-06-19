@@ -70,11 +70,26 @@ class Server:
         
         
     def StopTcpServer(self):
-        try:
-            self.connection.close()
-            self.connection1.close()
-        except Exception as e:
-            print ('\n'+"No client connection")
+        # Close BOTH the accepted client connections AND the listening sockets.
+        # If the listening sockets are left open, the next StartTcpServer() (on a
+        # server On/Off toggle or a Reset) fails to re-bind the same ports with
+        # "Address already in use" and the server crashes. Each close is guarded
+        # so a missing/already-closed socket never raises.
+        for sock_name in ("connection", "connection1", "server_socket", "server_socket1"):
+            sock = getattr(self, sock_name, None)
+            if sock is not None:
+                # shutdown() first so a thread blocked in accept()/recv() on this
+                # socket wakes up and releases the file descriptor; otherwise the
+                # port stays bound and the next StartTcpServer() hits EADDRINUSE.
+                try:
+                    sock.shutdown(socket.SHUT_RDWR)
+                except Exception:
+                    pass
+                try:
+                    sock.close()
+                except Exception:
+                    pass
+                setattr(self, sock_name, None)
          
     def Reset(self):
         self.StopTcpServer()
@@ -91,7 +106,11 @@ class Server:
             self.connection=self.connection.makefile('wb')
         except:
             pass
-        self.server_socket.close()
+        try:
+            self.server_socket.close()
+        except Exception:
+            pass
+        camera = None
         try:
             camera = Picamera2()
             # 400x300 jpeg frames, same resolution the old picamera code used.
@@ -119,11 +138,21 @@ class Server:
                     print(e)
                     print ("End transmit ... " )
                     break
-            camera.stop()
-            camera.close()
-        except Exception as e:
+        except BaseException as e:
+            # BaseException also catches the SystemExit that stop_thread injects
+            # when the server is toggled Off, so the camera is always released in
+            # the finally below and the next On can reopen it.
             print(e)
-            pass
+        finally:
+            if camera is not None:
+                try:
+                    camera.stop()
+                except Exception:
+                    pass
+                try:
+                    camera.close()
+                except Exception:
+                    pass
                  
     def stopMode(self):
         try:
@@ -301,7 +330,12 @@ class Server:
         while True:
             ADC_Power=self.adc.recvADC(2)*3
             time.sleep(3)
-            if ADC_Power < 6.8:
+            if ADC_Power < 3:
+                # A reading near 0 V means the battery is switched off or simply
+                # not connected - that is not a "low battery", so stay silent
+                # instead of beeping continuously.
+                self.buzzer.run('0')
+            elif ADC_Power < 6.8:
                 for i in range(4):
                     self.buzzer.run('1')
                     time.sleep(0.1)
