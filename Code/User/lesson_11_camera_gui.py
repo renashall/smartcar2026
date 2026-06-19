@@ -23,7 +23,7 @@ import numpy as np        # NumPy: turns raw bytes into an image
 # PyQt5 is the toolkit that builds the window, buttons, and sliders.
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from Command import COMMAND   # the command names the car's server understands
+from command import COMMAND   # the command names the car's server understands
 
 # ---- settings ----
 VIDEO_PORT = 8000             # we receive pictures on this port

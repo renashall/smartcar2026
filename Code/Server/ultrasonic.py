@@ -1,8 +1,8 @@
 import time
-from Motor import *
+from motor import *
 import RPi.GPIO as GPIO
 from servo import *
-from PCA9685 import PCA9685
+from pca9685 import PCA9685
 class Ultrasonic:
     def __init__(self):
         GPIO.setwarnings(False)

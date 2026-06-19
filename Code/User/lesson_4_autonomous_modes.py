@@ -12,10 +12,10 @@ This script has two self-driving modes. Pick one with DEMO_MODE:
 import car_setup          # adds the car's code folders to the import path
 import time
 
-from Motor import Motor          # driving wheels
-from ADC import Adc              # reads the light sensors (for "light" mode)
+from motor import Motor          # driving wheels
+from adc import Adc              # reads the light sensors (for "light" mode)
 from servo import Servo          # turns the head (module file is "servo.py", lowercase)
-from Ultrasonic import Ultrasonic   # measures distance (for "sonic" mode)
+from ultrasonic import Ultrasonic   # measures distance (for "sonic" mode)
 
 # ---- settings you can change ----
 DEMO_MODE = "sonic"       # "light" or "sonic"

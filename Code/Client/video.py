@@ -7,7 +7,7 @@ import io
 import struct
 from PIL import Image
 from multiprocessing import Process
-from Command import COMMAND as cmd
+from command import COMMAND as cmd
 
 class VideoStreaming:
     def __init__(self):

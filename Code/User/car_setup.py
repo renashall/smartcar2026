@@ -7,9 +7,9 @@ each script with this single line BEFORE you import any car module:
 
 After that, you can import the car's modules normally, for example:
 
-    from Motor import Motor
-    from Led import Led
-    from Command import COMMAND
+    from motor import Motor
+    from led import Led
+    from command import COMMAND
 
 How it works: this file finds the folder it lives in, steps up to the "Code"
 folder, and adds the Server, Client, and Modules folders to Python's import
@@ -32,7 +32,7 @@ from pathlib import Path
 CODE_DIR = Path(__file__).resolve().parent.parent   # .../smartcar2026/Code
 
 # The car's code is split into three folders. We add each one to Python's
-# search path so that "from Motor import Motor" (and friends) just work.
+# search path so that "from motor import Motor" (and friends) just work.
 for folder_name in ("Server", "Client", "Modules"):
     folder = CODE_DIR / folder_name          # build the full path to the folder
 

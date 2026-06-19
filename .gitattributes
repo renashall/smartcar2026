@@ -1,4 +1,5 @@
-# Keep shell scripts LF so they run on the Raspberry Pi (Linux).
-# Without this, git on Windows can check them out with CRLF, which breaks
-# the shebang line (e.g. "/usr/bin/env: 'bash\r': No such file or directory").
+# Keep shell scripts and Python LF so they run cleanly on the Raspberry Pi
+# (Linux). Without this, git on Windows can check them out with CRLF, which
+# breaks shell shebangs ("/usr/bin/env: 'bash\r'...") and keeps the diffs noisy.
 *.sh text eol=lf
+*.py text eol=lf

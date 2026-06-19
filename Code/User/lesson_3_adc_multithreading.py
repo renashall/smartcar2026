@@ -17,8 +17,8 @@ import time
 # when it is time to stop.
 from threading import Thread, Event
 
-from ADC import Adc           # reads sensor voltages
-from Buzzer import Buzzer     # the beeper, used for the low-battery warning
+from adc import Adc           # reads sensor voltages
+from buzzer import Buzzer     # the beeper, used for the low-battery warning
 
 # ---- ADC channels ----
 # The ADC has several inputs ("channels"), numbered 0, 1, 2... Each sensor is

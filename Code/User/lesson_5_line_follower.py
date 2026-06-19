@@ -14,7 +14,7 @@ import time
 # are wired to pins, and each pin reads either 1 (line) or 0 (floor).
 import RPi.GPIO as GPIO
 
-from Motor import Motor          # driving wheels
+from motor import Motor          # driving wheels
 
 # ---- sensor pins (BCM numbering) ----
 # These are the Raspberry Pi pin numbers each infrared sensor is plugged into.

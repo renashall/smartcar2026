@@ -25,7 +25,7 @@ import sys                # to read the IP address you type on the command line
 import cv2                # OpenCV: shows pictures and finds faces
 import numpy as np        # NumPy: turns raw bytes into an image
 
-from Command import COMMAND   # the command names the car's server understands
+from command import COMMAND   # the command names the car's server understands
 
 # ---- settings ----
 VIDEO_PORT = 8000         # we receive pictures on this port
