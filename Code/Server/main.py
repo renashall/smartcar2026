@@ -28,6 +28,10 @@ class mywindow(QMainWindow,Ui_server_ui):
             self.m_DragPosition=self.pos()
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
             self.setMouseTracking(True)
+            try:
+                self.label_ip.setText("IP: " + str(self.TCP_Server.get_interface_ip()))
+            except Exception:
+                self.label_ip.setText("IP: unavailable")
             self.Button_Server.setText("On")
             self.on_pushButton()
             self.Button_Server.clicked.connect(self.on_pushButton)
@@ -88,10 +92,20 @@ class mywindow(QMainWindow,Ui_server_ui):
         if self.user_ui:
             QCoreApplication.instance().quit()
         os._exit(0)
+    def _set_status(self, running):
+        """Update the status label (green=On / red=Off, bold) and the button."""
+        if running:
+            self.label.setText("Server On")
+            self.label.setStyleSheet("background:transparent;border:none;color:#21c46a;")
+            self.Button_Server.setText("Off")
+        else:
+            self.label.setText("Server Off")
+            self.label.setStyleSheet("background:transparent;border:none;color:#e02d2d;")
+            self.Button_Server.setText("On")
+
     def on_pushButton(self):
         if self.label.text()=="Server Off":
-            self.label.setText("Server On")
-            self.Button_Server.setText("Off")
+            self._set_status(True)
             self.TCP_Server.tcp_Flag = True
             print ("Open TCP")
             try:
@@ -106,12 +120,10 @@ class mywindow(QMainWindow,Ui_server_ui):
                 # Never let a start-up hiccup crash the GUI; roll the button back.
                 print("Could not start server:", e)
                 self.TCP_Server.StopTcpServer()
-                self.label.setText("Server Off")
-                self.Button_Server.setText("On")
+                self._set_status(False)
 
         elif self.label.text()=='Server On':
-            self.label.setText("Server Off")
-            self.Button_Server.setText("On")
+            self._set_status(False)
             self.TCP_Server.tcp_Flag = False
             try:
                 stop_thread(self.ReadData)
