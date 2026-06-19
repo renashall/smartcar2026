@@ -37,24 +37,13 @@ scripts prompt for the Pi model and OS-image date, then reboot at the end.
 Course lesson code, kept separate from the Freenove `Server` / `Client` / `Modules`
 files so student work never collides with the kit's source:
 
-- `car_setup.py` — helper that adds `Code/Server`, `Code/Client`, and `Code/Modules`
-  to Python's import path. A lesson script only needs `import car_setup` at the top
-  before importing car modules (e.g. `from Motor import Motor`).
+- `car_setup.py` — helper that adds `Code/Server` and `Code/Client` to Python's
+  import path. A lesson script only needs `import car_setup` at the top before
+  importing car modules (e.g. `from motor import Motor`).
 - Lesson scripts: `lesson_1_components.py` … `lesson_8_multiple_face_detection.py` and
   `lesson_11_camera_gui.py`. Lesson 6 ships two files — `lesson_6_pi_camera_stream_server.py`
   (runs on the Pi) and `lesson_6_client_video_receiver.py`.
 - `user.md` — notes for the folder.
-
-### `Code/Modules/` — new folder
-Shared modules the lesson scripts import (via `car_setup.py`):
-
-- `SmartCarModules/` — the car driver modules: `Motor.py`, `Led.py`, `Buzzer.py`,
-  `servo.py`, `Ultrasonic.py`, `Line_Tracking.py`, `ADC.py`, `Thread.py`, `Light.py`,
-  `Command.py`, `PCA9685.py`, `audio.py`.
-- `aicode101/` — machine-learning helpers: `predict.py`, `aicode101_img_utils.py`, and a
-  `model/` directory.
-- `utils/` — `haarcascade_frontalface_default.xml`, a MobileNet V2 TFLite feature model,
-  and image-classification utilities.
 
 ### `Resources/` — new folder
 Documentation PDFs organized into one place:

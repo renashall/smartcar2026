@@ -12,8 +12,8 @@ After that, you can import the car's modules normally, for example:
     from command import COMMAND
 
 How it works: this file finds the folder it lives in, steps up to the "Code"
-folder, and adds the Server, Client, and Modules folders to Python's import
-path. That means you never have to write long file paths yourself.
+folder, and adds the Server and Client folders to Python's import path. That
+means you never have to write long file paths yourself.
 """
 
 # "sys" lets us look at and change Python's settings while the program runs.
@@ -31,9 +31,9 @@ from pathlib import Path
 # computer the project is copied onto.
 CODE_DIR = Path(__file__).resolve().parent.parent   # .../smartcar2026/Code
 
-# The car's code is split into three folders. We add each one to Python's
+# The car's code is split across these folders. We add each one to Python's
 # search path so that "from motor import Motor" (and friends) just work.
-for folder_name in ("Server", "Client", "Modules"):
+for folder_name in ("Server", "Client"):
     folder = CODE_DIR / folder_name          # build the full path to the folder
 
     # Only add a folder if it really exists, and don't add it twice.

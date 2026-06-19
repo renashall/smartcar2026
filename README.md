@@ -4,20 +4,20 @@
 
 > AI Code Academy has appended this repository for the "Machine Learning with Raspberry Pi Smart Car" course. The original Freenove project files are still present, and the course-specific lesson code lives in `Code/User`.
 
-<img src='Picture/icon.png' width='30%'/>
+<img src='Resources/icon.png' width='30%'/>
 
 ### Download
 
-* **Use command in console**
+- **Use command in console**
 
-	Run following command to download all the files in this repository.
+  Run following command to download all the files in this repository.
 
-	`git clone https://github.com/Freenove/Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi.git`
+  `git clone https://github.com/Freenove/Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi.git`
 
-* **Manually download in browser**
+- **Manually download in browser**
 
-	Click the green "Clone or download" button, then click "Download ZIP" button in the pop-up window.
-	Do NOT click the "Open in Desktop" button, it will lead you to install Github software.
+  Click the green "Clone or download" button, then click "Download ZIP" button in the pop-up window.
+  Do NOT click the "Open in Desktop" button, it will lead you to install Github software.
 
 > If you meet any difficulties, please contact our support team for help.
 
@@ -50,7 +50,7 @@ Create your own course and experiment files in:
 smartcar2026/Code/User
 ```
 
-This keeps your work separate from the Freenove `Code/Server`, `Code/Client`, and `Code/Modules` files.
+This keeps your work separate from the Freenove `Code/Server` and `Code/Client` files.
 
 When a script in `Code/User` needs to import the car modules, put this line at the top of the script before other car imports:
 
@@ -68,7 +68,7 @@ from Led import Led
 from Command import COMMAND
 ```
 
-`Code/User/car_setup.py` adds the project `Code/Server`, `Code/Client`, and `Code/Modules` folders to Python's import path. Keep `car_setup.py` in `Code/User`; you do not need to copy it into each lesson file.
+`Code/User/car_setup.py` adds the project `Code/Server` and `Code/Client` folders to Python's import path. Keep `car_setup.py` in `Code/User`; you do not need to copy it into each lesson file.
 
 To run one of your scripts from the Raspberry Pi, open a terminal in the `Code/User` folder and run it with Python 3:
 
@@ -81,11 +81,11 @@ python3 your_script.py
 
 Freenove provides free and quick customer support. Including but not limited to:
 
-* Quality problems of products
-* Using Problems of products
-* Questions of learning and creation
-* Opinions and suggestions
-* Ideas and thoughts
+- Quality problems of products
+- Using Problems of products
+- Questions of learning and creation
+- Opinions and suggestions
+- Ideas and thoughts
 
 Please send an email to:
 
@@ -114,7 +114,6 @@ You can find a copy of the license in this repository.
 
 Freenove brand and logo are copyright of Freenove Creative Technology Co., Ltd. Can't be used without formal permission.
 
-
 ### About
 
 Freenove is an open-source electronics platform.
@@ -123,10 +122,10 @@ Freenove is committed to helping customer quickly realize the creative idea and 
 
 Our services include:
 
-* Robot kits
-* Learning kits for Arduino, Raspberry Pi and micro:bit
-* Electronic components and modules, tools
-* Product customization service
+- Robot kits
+- Learning kits for Arduino, Raspberry Pi and micro:bit
+- Electronic components and modules, tools
+- Product customization service
 
 Our code and circuit are open source. You can obtain the details and the latest information through visiting the following web site:
 
