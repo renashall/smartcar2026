@@ -14,8 +14,13 @@ the system packages the car hardware needs, and a .venv would hide them.
 
 How to run it (use your normal system Python -- NOT inside a .venv):
 
-    Windows:        python setup.py
-    macOS / Linux:  python3 setup.py
+    Windows:        python Code/setup.py
+    macOS / Linux:  python3 Code/setup.py
+
+You can also run it from inside the Code folder:
+
+    Windows:        cd Code && python setup.py
+    macOS / Linux:  cd Code && python3 setup.py
 
 You do NOT need administrator or sudo for this. It only creates a .venv folder
 inside this project; it does not touch system Python. Useful options:
@@ -37,7 +42,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parent.parent
 VENV_DIR = REPO_ROOT / ".venv"
 REQUIREMENTS = REPO_ROOT / "requirements.txt"
 

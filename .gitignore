@@ -39,6 +39,7 @@ dist/
 venv/
 env/
 ENV/
+.claude/
 
 # Logs and local output
 *.log

@@ -193,8 +193,8 @@ install_car_libraries() {
     exit 1
   fi
 
-  # This used to run Code/build.sh + Code/setup.py. Those helper files were
-  # removed; the only car-specific thing they installed is the WS281x driver for
+  # This used to run Freenove's Code/build.sh + Pi-oriented Code/setup.py helper.
+  # Those helper behaviors were removed/replaced; the only car-specific thing they installed is the WS281x driver for
   # the addressable LED strip, so install it directly here. (python3-pyqt5 and
   # the other lesson packages are handled by install_course_python_packages.)
   echo "Installing the addressable-LED (WS281x) driver used by the car..."
