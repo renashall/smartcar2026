@@ -50,3 +50,6 @@ logs/
 .env
 .env.*
 !.env.example
+
+# Separate project (its own git repo) - not part of this repo
+smartcar2026-slides/
