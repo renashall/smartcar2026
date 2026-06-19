@@ -94,14 +94,21 @@ class mywindow(QMainWindow,Ui_server_ui):
             self.Button_Server.setText("Off")
             self.TCP_Server.tcp_Flag = True
             print ("Open TCP")
-            self.TCP_Server.StartTcpServer()
-            self.SendVideo=Thread(target=self.TCP_Server.sendvideo)
-            self.ReadData=Thread(target=self.TCP_Server.readdata)
-            self.power=Thread(target=self.TCP_Server.Power)
-            self.SendVideo.start()
-            self.ReadData.start()
-            self.power.start()
-            
+            try:
+                self.TCP_Server.StartTcpServer()
+                self.SendVideo=Thread(target=self.TCP_Server.sendvideo)
+                self.ReadData=Thread(target=self.TCP_Server.readdata)
+                self.power=Thread(target=self.TCP_Server.Power)
+                self.SendVideo.start()
+                self.ReadData.start()
+                self.power.start()
+            except Exception as e:
+                # Never let a start-up hiccup crash the GUI; roll the button back.
+                print("Could not start server:", e)
+                self.TCP_Server.StopTcpServer()
+                self.label.setText("Server Off")
+                self.Button_Server.setText("On")
+
         elif self.label.text()=='Server On':
             self.label.setText("Server Off")
             self.Button_Server.setText("On")

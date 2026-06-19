@@ -20,10 +20,16 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import * 
 class mywindow(QMainWindow,Ui_Client):
+    # Sensor readings arrive on a background socket thread. Updating Qt widgets
+    # off the GUI thread crashes PyQt intermittently, so the receive thread emits
+    # this signal and the GUI thread does the actual widget updates in the slot.
+    sensor_signal = pyqtSignal(str, list)
+
     def __init__(self):
         global timer
         super(mywindow,self).__init__()
         self.setupUi(self)
+        self.sensor_signal.connect(self._update_sensor_ui)
         self.endChar='\n'
         self.intervalChar='#'
         self.h=self.IP.text()
@@ -571,13 +577,27 @@ class mywindow(QMainWindow,Ui_Client):
                         cmdArray=cmdArray[:-1]
                 for oneCmd in cmdArray:
                     Massage=oneCmd.split("#")
+                    # Hand the data to the GUI thread via the signal; never touch
+                    # widgets directly from this background thread.
                     if cmd.CMD_SONIC in Massage:
-                        self.Ultrasonic.setText('Obstruction:%s cm'%Massage[1])
+                        self.sensor_signal.emit(cmd.CMD_SONIC, Massage[1:])
                     elif cmd.CMD_LIGHT in Massage:
-                        self.Light.setText("Left:"+Massage[1]+'V'+' '+"Right:"+Massage[2]+'V')
-                    elif cmd. CMD_POWER in Massage:
-                        percent_power=int((float(Massage[1])-7)/1.40*100)
-                        self.progress_Power.setValue(percent_power) 
+                        self.sensor_signal.emit(cmd.CMD_LIGHT, Massage[1:])
+                    elif cmd.CMD_POWER in Massage:
+                        self.sensor_signal.emit(cmd.CMD_POWER, Massage[1:])
+
+    def _update_sensor_ui(self, kind, fields):
+        """Runs on the GUI thread (via sensor_signal) to update sensor widgets."""
+        try:
+            if kind == cmd.CMD_SONIC:
+                self.Ultrasonic.setText('Obstruction:%s cm' % fields[0])
+            elif kind == cmd.CMD_LIGHT:
+                self.Light.setText("Left:" + fields[0] + 'V' + ' ' + "Right:" + fields[1] + 'V')
+            elif kind == cmd.CMD_POWER:
+                percent_power = int((float(fields[0]) - 7) / 1.40 * 100)
+                self.progress_Power.setValue(max(0, min(100, percent_power)))
+        except (IndexError, ValueError):
+            pass
     def is_valid_jpg(self,jpg_file):
         try:
             bValid = True
