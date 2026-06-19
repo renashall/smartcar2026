@@ -483,10 +483,10 @@ QSlider::handle:vertical:hover { background:#ffffff; }
     def retranslateUi(self, Client):
         _translate = QtCore.QCoreApplication.translate
         Client.setWindowTitle(_translate("Client", "freenove"))
-        self.Btn_ForWard.setText(_translate("Client", "ForWard"))
+        self.Btn_ForWard.setText(_translate("Client", "Forward"))
         self.name.setText(_translate("Client", "FREENOVE"))
         self.Btn_Turn_Left.setText(_translate("Client", "Turn Left"))
-        self.Btn_BackWard.setText(_translate("Client", "BackWard"))
+        self.Btn_BackWard.setText(_translate("Client", "Backward"))
         self.Btn_Turn_Right.setText(_translate("Client", "Turn Right"))
         self.Btn_Video.setText(_translate("Client", "Open Video"))
         self.Btn_Down.setText(_translate("Client", "Down"))
