@@ -5,7 +5,7 @@ and has been adapted by **AI Code Academy** for the course *"Machine Learning wi
 Raspberry Pi & Smart Car."* The original Freenove project files are preserved; this
 document records what has been **added, changed, or reorganized** on top of them.
 
-_Last updated: 2026-06-19_
+_Last updated: 2026-06-20_
 
 ---
 
@@ -90,6 +90,12 @@ client skipped detection and just saved the frame. With the guard gone, the same
 detects faces on **any platform, including the Raspberry Pi itself**. (The course's own
 lesson scripts in `Code/User` — `lesson_7_face_tracking.py`, `lesson_8_multiple_face_detection.py`,
 and `lesson_11_camera_gui.py` — were written without that restriction for the same reason.)
+
+### `Code/Server/servo.py` — servo commands are clamped to safe hardware ranges
+Servo angles are now clamped to `0..180` degrees, and converted PWM pulses are clamped
+to the standard `500..2500 us` range before being sent to the PCA9685. This keeps the
+horizontal ultrasonic servo from receiving out-of-range pulses at the far right end of
+the client control.
 
 ---
 
