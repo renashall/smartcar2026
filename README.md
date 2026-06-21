@@ -88,6 +88,7 @@ smartcar2026/Code/User
 ```
 
 This keeps your work separate from the Freenove `Code/Server` and `Code/Client` files.
+The private course branch includes the example smart car user-code files for this folder; the public branch may only include the shared setup helper and notes.
 
 When a script in `Code/User` needs to import the car modules, put this line at the top of the script before other car imports:
 
