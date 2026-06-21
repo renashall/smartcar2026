@@ -88,6 +88,7 @@ smartcar2026/Code/User
 ```
 
 This keeps your work separate from the Freenove `Code/Server` and `Code/Client` files.
+This folder holds the example smart car user-code lesson files alongside the shared `car_setup.py` setup helper and notes.
 
 When a script in `Code/User` needs to import the car modules, put this line at the top of the script before other car imports:
 
