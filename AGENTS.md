@@ -17,9 +17,9 @@ See `CHANGES.md` for the full list of additions.
   editing unless necessary.
 - `Code/Client/` — Freenove desktop client (PyQt5). Preserved Freenove code.
 - `Code/User/` — **course lesson scripts** (the primary place for new work).
-  Keep student/course code here, separate from the Freenove source. The private
-  working branch keeps lesson `.py` files here; the public `main` branch keeps
-  only `car_setup.py` and `user.md` in this folder.
+  Keep student/course code here, separate from the Freenove source. This folder
+  holds the lesson `.py` files alongside the shared `car_setup.py` helper and
+  `USER.md` notes.
 - `Application/`, `Code/Patch/`, `Datasheet/`, `Resources/` — original app
   files, assets, datasheets, and patches.
 - `Code/setupPart1.sh` / `Code/setupPart2.sh` — two-stage Raspberry Pi setup
