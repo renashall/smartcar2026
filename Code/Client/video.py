@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import cv2
+import os
 import socket
 import io
 import struct
@@ -51,7 +52,12 @@ class VideoStreaming:
         else:
             self.face_x=0
             self.face_y=0
-        cv2.imwrite('video.jpg',img)
+        # Write atomically: render to a temp file, then rename it onto
+        # video.jpg in one step. cv2.imwrite is not atomic, so without this
+        # the GUI timer can read a half-written file, fail JPEG validation,
+        # and flash the "No video available" placeholder between frames.
+        cv2.imwrite('video_tmp.jpg', img)
+        os.replace('video_tmp.jpg', 'video.jpg')
         
     def streaming(self,ip):
         stream_bytes = b' '
