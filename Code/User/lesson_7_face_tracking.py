@@ -15,6 +15,23 @@ but the Pi works too as long as it has a screen or a VNC desktop.
 
 Lesson 8 imports this file and reuses these functions, so each one is written to
 do one clear job (connect, read a picture, find faces, move the head).
+
+------------------------------------------------------------------------------
+How the network part works
+------------------------------------------------------------------------------
+Unlike Lesson 6 (which only RECEIVED video), this lesson needs to do two things
+at once: receive the video AND send commands back to steer the head. So this
+program opens TWO separate TCP connections to the car's server (main.py):
+
+  * Port 8000 - the VIDEO connection. We only READ from it: the same 4-byte
+    length + JPEG photo framing as Lesson 6.
+  * Port 5000 - the COMMAND connection. We only WRITE to it: short text lines
+    like "CMD_SERVO#0#95\n" that tell a servo what angle to turn to.
+
+Why two connections instead of one? Because the car's server was built that way:
+it streams pictures on one port and listens for control commands on another.
+Keeping them separate also keeps each one simple - one is a pure download, the
+other is a pure upload. Both are independent phone calls to the same Pi.
 """
 
 import car_setup          # adds the car's code folders to the import path
@@ -70,28 +87,37 @@ def setup():
         raise FileNotFoundError("Could not load the face file: " + str(CASCADE_PATH))
 
     pi_ip = sys.argv[1]
-    # Open the picture connection (port 8000) and read it like a file.
+    # --- Connection 1: VIDEO (port 8000). We will only read from this. ---
+    # socket() makes the phone, connect() dials the Pi's video port. makefile
+    # ("rb") wraps it so we can read photo bytes with file-style .read().
     video_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     video_socket.connect((pi_ip, VIDEO_PORT))
     video_file = video_socket.makefile("rb")
 
-    # Open a second connection (port 5000) for sending servo commands.
+    # --- Connection 2: COMMANDS (port 5000). We will only write to this. ---
+    # A completely separate socket and a separate connect() to a DIFFERENT port
+    # on the SAME Pi. We send raw bytes straight through this socket (no
+    # makefile needed) using send_servo() below.
     command_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     command_socket.connect((pi_ip, COMMAND_PORT))
     print("Connected to", pi_ip)
 
 
 def read_frame():
-    """Read one picture from the Pi, or return None when the stream ends."""
+    """Read one picture from the Pi, or return None when the stream ends.
+
+    Exactly the same length-prefix decoding as Lesson 6: read the 4-byte size,
+    then read that many bytes of JPEG. A size of 0 (or a short read) means stop.
+    """
     header = video_file.read(4)           # first 4 bytes = the picture's size
     if len(header) != 4:
-        return None
-    length = struct.unpack("<L", header)[0]   # turn those bytes into a number
+        return None                       # connection closed before the size arrived
+    length = struct.unpack("<L", header)[0]   # "<L" = little-endian 4-byte int
     if length == 0:
-        return None
+        return None                       # 0 is the server's "video over" signal
     jpeg_data = video_file.read(length)   # read exactly that many bytes
     if len(jpeg_data) != length:
-        return None
+        return None                       # cut off mid-picture
     # Turn the raw JPEG bytes into a picture we can search and show.
     return cv2.imdecode(np.frombuffer(jpeg_data, dtype=np.uint8), cv2.IMREAD_COLOR)
 
@@ -115,9 +141,20 @@ def biggest_face(faces):
 
 
 def send_servo(channel, angle):
-    """Send one servo command to the car, e.g. CMD_SERVO#0#95."""
-    # The server expects: command name, then "#", then values, then a newline.
+    """Send one servo command to the car, e.g. CMD_SERVO#0#95.
+
+    This is the "upload" half of the program - it writes to the command socket
+    (port 5000) instead of reading from the video socket.
+    """
+    # The car's server has its own little text protocol for commands:
+    #   command name, then "#", then each value separated by "#", then a newline.
+    # The trailing "\n" matters: it marks the END of one command, the same way
+    # the 4-byte length marks the end of a photo. It is how the server knows one
+    # command has finished and the next one begins.
     message = cmd.CMD_SERVO + "#" + channel + "#" + str(int(angle)) + "\n"
+    # A socket can only send raw bytes, never a Python text string, so we
+    # .encode("utf-8") to convert the text into bytes first, then send() pushes
+    # those bytes down the command connection to the Pi.
     command_socket.send(message.encode("utf-8"))   # text must be sent as bytes
 
 
@@ -166,6 +203,8 @@ def loop():
 
 def destroy():
     """Close both connections and the window when we are finished."""
+    # We opened two phone calls, so we hang up both of them here. Leaving a
+    # socket open would keep the port tied up until the OS eventually times out.
     if video_file is not None:
         video_file.close()
     if video_socket is not None:
