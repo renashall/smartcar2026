@@ -16,6 +16,22 @@ This makes tracking less jumpy when two people are in view.
 (Importing Lesson 7 also runs its `import car_setup`, so the car's code folders
 are ready for us too. Keep this file in the same folder as Lesson 7.)
 
+------------------------------------------------------------------------------
+How the network part works
+------------------------------------------------------------------------------
+There is no new networking code in this lesson - it all comes from Lesson 7,
+which we imported as `face`. When we call:
+
+  * face.setup()       -> opens the two TCP connections (video on port 8000,
+                          commands on port 5000) and loads the face detector.
+  * face.read_frame()  -> reads one photo using the 4-byte-length framing.
+  * face.track_face()  -> sends servo commands over the command connection.
+  * face.destroy()     -> closes both connections at the end.
+
+So the whole video-in / commands-out pipeline is identical to Lesson 7. The ONLY
+new thing here is smarter logic for picking WHICH face to follow when several
+are on screen (see choose_target below).
+
 Press q to quit.
 """
 
@@ -98,6 +114,8 @@ def loop():
     """Read pictures, mark all faces, keep a target lock, and show the video."""
     previous_target = None
     while True:
+        # face.read_frame() pulls one photo off the VIDEO connection (port 8000)
+        # using Lesson 7's code. It returns None when the Pi ends the stream.
         frame = face.read_frame()           # from Lesson 7: get one picture
         if frame is None:
             break
@@ -106,6 +124,8 @@ def loop():
         previous_target = target
         draw_faces(frame, faces, target, target_mode)
         draw_detection_summary(frame, faces, target, target_mode)
+        # face.track_face() sends servo commands over the COMMAND connection
+        # (port 5000), again using Lesson 7's code, to steer the head.
         face.track_face(target)             # from Lesson 7: turn toward the target
         cv2.imshow(WINDOW_NAME, frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
