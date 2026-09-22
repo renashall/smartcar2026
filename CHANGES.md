@@ -105,6 +105,16 @@ to the standard `500..2500 us` range before being sent to the PCA9685. This keep
 horizontal ultrasonic servo from receiving out-of-range pulses at the far right end of
 the client control.
 
+### `Code/Server/led.py` — LEDs work on the Raspberry Pi 5
+`rpi_ws281x` cannot drive the LEDs on a Pi 5 (GPIO moved to the RP1 chip), so creating
+`Led()` failed with `ws2811_init failed with code -3 (Hardware revision is not
+supported)` and then segfaulted. `led.py` now reads `/proc/device-tree/model`. On a
+Pi 5 it swaps in a small `Adafruit_NeoPixel` stand-in built on `Adafruit-Blinka-Raspberry-Pi5-Neopixel`,
+which drives the same GPIO 18 through the RP1's PIO block. On older Pis it still imports
+`rpi_ws281x`. The `Led` class API is unchanged, so lessons need no edits.
+`setupPart2.sh` installs that driver (and `python3-rpi-lgpio`, the Pi 5-compatible
+`RPi.GPIO`) when it detects a Pi 5.
+
 ---
 
 ## Removed / moved

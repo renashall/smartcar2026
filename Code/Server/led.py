@@ -1,6 +1,66 @@
 # -*-coding: utf-8 -*-
 import time
-from rpi_ws281x import *
+
+def _is_pi5():
+    """True on a Raspberry Pi 5, which rpi_ws281x does not support."""
+    try:
+        with open('/proc/device-tree/model') as f:
+            return 'Raspberry Pi 5' in f.read()
+    except OSError:
+        return False
+
+IS_PI5 = _is_pi5()
+
+if IS_PI5:
+    # The Pi 5 moved GPIO onto its RP1 chip, so rpi_ws281x fails with
+    # "Hardware revision is not supported". Drive the strip through the RP1's
+    # PIO block instead (pip package: Adafruit-Blinka-Raspberry-Pi5-Neopixel).
+    import atexit
+    import adafruit_raspberry_pi5_neopixel_write as _pi5_neopixel
+
+    def Color(red, green, blue, white=0):
+        """Same 24-bit colour packing as rpi_ws281x.Color."""
+        return (white << 24) | (red << 16) | (green << 8) | blue
+
+    class _Pi5Pin:
+        """Minimal pin object: the Pi 5 driver only reads `.id` (the GPIO number)."""
+        def __init__(self, gpio):
+            self.id = gpio
+
+    class Adafruit_NeoPixel:
+        """Stand-in for rpi_ws281x.Adafruit_NeoPixel with the methods this file uses."""
+        def __init__(self, num, pin, freq_hz=800000, dma=10, invert=False,
+                     brightness=255, channel=0):
+            self._pin = _Pi5Pin(pin)
+            self._pixels = [0] * num
+            self._brightness = brightness
+
+        def begin(self):
+            atexit.register(_pi5_neopixel.free_pio)
+
+        def show(self):
+            # rpi_ws281x's default strip type is GRB, so send the bytes in that order.
+            scale = self._brightness + 1
+            buf = bytearray()
+            for c in self._pixels:
+                r, g, b = (c >> 16) & 255, (c >> 8) & 255, c & 255
+                buf += bytes(((g * scale) >> 8, (r * scale) >> 8, (b * scale) >> 8))
+            _pi5_neopixel.neopixel_write(self._pin, buf)
+
+        def setPixelColor(self, n, color):
+            if 0 <= n < len(self._pixels):
+                self._pixels[n] = color
+
+        def getPixelColor(self, n):
+            return self._pixels[n]
+
+        def setBrightness(self, brightness):
+            self._brightness = brightness
+
+        def numPixels(self):
+            return len(self._pixels)
+else:
+    from rpi_ws281x import *
 # LED strip configuration:
 LED_COUNT      = 8      # Number of LED pixels.
 LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
