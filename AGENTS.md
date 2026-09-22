@@ -55,7 +55,8 @@ See `CHANGES.md` for the full list of additions.
 
 - **On the Pi:** Lessons 1–5 and `lesson_6_pi_camera_stream_server.py`.
   Run LED lessons (1, 2) with **`sudo`** — `rpi_ws281x` needs root
-  (`Can't open /dev/mem` otherwise).
+  (`Can't open /dev/mem` otherwise). On a Pi 5, `led.py`
+  uses the `Adafruit-Blinka-Raspberry-Pi5-Neopixel` driver instead of `rpi_ws281x`.
 - **On the Pi or a laptop:** `lesson_6_client_video_receiver.py`, Lessons 7, 8,
   11. Need `opencv-python`, `numpy`, and (Lesson 11) `PyQt5`. Pass the Pi's IP
   on the command line, or type it into Lesson 11's box.

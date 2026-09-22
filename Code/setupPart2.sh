@@ -210,6 +210,29 @@ install_car_libraries() {
     echo "If the LED lessons fail, install it by hand with:"
     echo "  sudo pip3 install rpi_ws281x --break-system-packages"
   fi
+
+  # rpi_ws281x does not support the Pi 5 (its GPIO lives on the RP1 chip), so
+  # Code/Server/led.py drives the LEDs through the RP1's PIO block there instead.
+  # The lessons run LED code with sudo, so install for root's python3.
+  if [ "$PI_MODEL" = "5" ]; then
+    echo "Raspberry Pi 5 detected: installing the Pi 5 LED driver..."
+    if sudo pip3 install Adafruit-Blinka-Raspberry-Pi5-Neopixel --break-system-packages; then
+      echo "Installed Adafruit-Blinka-Raspberry-Pi5-Neopixel from pip."
+    else
+      echo "Could not install the Pi 5 LED driver automatically."
+      echo "If the LED lessons fail, install it by hand with:"
+      echo "  sudo pip3 install Adafruit-Blinka-Raspberry-Pi5-Neopixel --break-system-packages"
+    fi
+    if [ ! -e /dev/pio0 ]; then
+      echo "Warning: /dev/pio0 is missing. Update the OS and firmware so the LEDs work:"
+      echo "  sudo apt update && sudo apt full-upgrade && sudo reboot"
+    fi
+
+    # The classic RPi.GPIO cannot drive Pi 5 GPIO; rpi-lgpio is a drop-in
+    # replacement (same "import RPi.GPIO") used by the buzzer and sensors.
+    sudo apt-get install -y python3-rpi-lgpio ||
+      echo "Could not install python3-rpi-lgpio; the buzzer/sensors may not work."
+  fi
 }
 
 install_course_python_packages() {
