@@ -28,6 +28,7 @@ PyQt5            # the GUI window for the client and Lesson 11
 # a Pi by hand without the setup scripts.
 #
 # RPi.GPIO       # GPIO pins (motors, buzzer, ultrasonic, line sensors)
-# rpi_ws281x     # the addressable LED strip
+# rpi_ws281x     # the addressable LED strip (Pi 4 and earlier)
+# Adafruit-Blinka-Raspberry-Pi5-Neopixel   # the LED strip on a Pi 5
 # picamera       # the Pi camera (Lesson 6 server side)
 # smbus2         # I2C bus for the ADC / battery / photoresistors

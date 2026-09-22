@@ -38,7 +38,12 @@ Replace `lesson_1_components.py` with the file you want to run.
 The LED strip library (`rpi_ws281x`) needs root access on the Raspberry Pi.
 Any lesson that lights the LEDs — **Lesson 1** and **Lesson 2** — must be run
 with `sudo`, or it will stop with a permission error such as
-`mmap() failed` / `Can't open /dev/mem`:
+`mmap() failed` / `Can't open /dev/mem`.
+
+On a **Raspberry Pi 5**, `rpi_ws281x` does not work at all (`Hardware revision is
+not supported`). `led.py` detects the Pi 5 and uses the
+`Adafruit-Blinka-Raspberry-Pi5-Neopixel` driver instead, which `setupPart2.sh`
+installs. Run the lessons the same way:
 
 ```sh
 sudo python3 lesson_1_components.py
