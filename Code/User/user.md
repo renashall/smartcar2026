@@ -27,7 +27,7 @@ from ADC import Adc
 From the Raspberry Pi terminal:
 
 ```sh
-cd smartcar2026/Code/User
+cd Smart-Car-Level-3/Code/User
 python3 lesson_1_components.py
 ```
 
