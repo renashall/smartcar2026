@@ -2,7 +2,7 @@
 
 > A 4WD smart car kit for Raspberry Pi.
 
-> AI Code Academy has appended this repository for the "Machine Learning with Raspberry Pi Smart Car" course. The original Freenove project files are still present, and the course-specific lesson code lives in `Code/User`.
+> AI Code Academy has appended this repository for the "Machine Learning with Raspberry Pi & Smart Car (Level 3)" course. The original Freenove project files are still present, and the course-specific lesson code lives in `Code/User`.
 
 <img src='Resources/icon.png' width='30%'/>
 
