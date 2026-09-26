@@ -88,10 +88,10 @@ Download the repository on each computer or Raspberry Pi where you plan to run t
 3. Run:
 
    ```sh
-   git clone https://github.com/renashall/Smart-Car-Level-3.git
+   git clone https://github.com/renashall/smartcar2026.git
    ```
 
-Alternatively, open the [repository on GitHub](https://github.com/renashall/Smart-Car-Level-3), select **Code**, then **Download ZIP**, and extract it. The extracted folder may have a different name; use its actual name in the commands below.
+Alternatively, open the [repository on GitHub](https://github.com/renashall/smartcar2026), select **Code**, then **Download ZIP**, and extract it. The extracted folder may have a different name; use its actual name in the commands below.
 
 ### Raspberry Pi Setup
 
@@ -124,13 +124,13 @@ Run these steps on the Pi after it boots. Use the Pi's Terminal directly, or con
 2. Clone this repository onto the Pi from its Terminal:
 
    ```sh
-   git clone https://github.com/renashall/Smart-Car-Level-3.git
+   git clone https://github.com/renashall/smartcar2026.git
    ```
 
 3. Enter the repository's `Code` folder and make the setup scripts executable:
 
    ```sh
-   cd Smart-Car-Level-3/Code
+   cd smartcar2026/Code
    chmod +x setupPart1.sh setupPart2.sh
    ```
 
@@ -144,7 +144,7 @@ Run these steps on the Pi after it boots. Use the Pi's Terminal directly, or con
 5. After rebooting, reconnect to the Pi, return to `Code`, and run the second script:
 
    ```sh
-   cd Smart-Car-Level-3/Code
+   cd smartcar2026/Code
    ./setupPart2.sh
    ```
 
@@ -157,7 +157,7 @@ Run these steps on the Pi after it boots. Use the Pi's Terminal directly, or con
 1. Open **PowerShell** on Windows or **Terminal** on macOS/Linux. Enter the downloaded project folder:
 
    ```sh
-   cd Smart-Car-Level-3
+   cd smartcar2026
    ```
 2. Run the setup helper with your system Python:
 
@@ -209,7 +209,7 @@ Keep your course and experiment scripts in `Code/User` so they stay separate fro
 1. Create your script in:
 
    ```text
-   Smart-Car-Level-3/Code/User
+   smartcar2026/Code/User
    ```
 2. Import `car_setup` before any car modules. It adds `Code/Server` and `Code/Client` to Python's import path, so you only need it once in each script:
 
@@ -223,7 +223,7 @@ Keep your course and experiment scripts in `Code/User` so they stay separate fro
 3. On the Raspberry Pi, open **Terminal** in the folder containing the project and run your script:
 
    ```sh
-   cd Smart-Car-Level-3/Code/User
+   cd smartcar2026/Code/User
    python3 your_script.py
    ```
 

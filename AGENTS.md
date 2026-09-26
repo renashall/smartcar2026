@@ -1,4 +1,4 @@
-# Agent Guide — Smart-Car-Level-3
+# Agent Guide — smartcar2026
 
 Shared guidance for LLM agents (Claude, Codex, Gemini, etc.) working in this
 repository. `CLAUDE.md` is a symlink to this file.

@@ -1,7 +1,7 @@
 """Lesson 7: Face Detection and Tracking.
 
 You can run this on the Raspberry Pi itself, or on a separate Windows, macOS,
-or Linux computer that connects to the Pi over Wi-Fi. Start the Smart-Car-Level-3
+or Linux computer that connects to the Pi over Wi-Fi. Start the smartcar2026
 server on the Pi first with `sudo python3 main.py`, then run this with the Pi's
 IP address (use 127.0.0.1 if you run it on the Pi itself):
 

@@ -1,6 +1,6 @@
 """Helper so your lesson scripts can use the car's code.
 
-Put your lesson scripts in this same folder (Smart-Car-Level-3/Code/User) and start
+Put your lesson scripts in this same folder (smartcar2026/Code/User) and start
 each script with this single line BEFORE you import any car module:
 
     import car_setup
@@ -29,7 +29,7 @@ from pathlib import Path
 #   .parent.parent  goes up one more level         -> .../Code
 # So CODE_DIR always points at the car's "Code" folder, no matter which
 # computer the project is copied onto.
-CODE_DIR = Path(__file__).resolve().parent.parent   # .../Smart-Car-Level-3/Code
+CODE_DIR = Path(__file__).resolve().parent.parent   # .../smartcar2026/Code
 
 # The car's code is split across these folders. We add each one to Python's
 # search path so that "from motor import Motor" (and friends) just work.

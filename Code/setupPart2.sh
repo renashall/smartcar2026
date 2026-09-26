@@ -23,8 +23,8 @@ find_package_dir() {
     current_dir="$(dirname "$current_dir")"
   done
 
-  echo "Could not find the Smart-Car-Level-3 package folder."
-  echo "Place this script in the Smart-Car-Level-3 folder or its Code folder."
+  echo "Could not find the smartcar2026 package folder."
+  echo "Place this script in the smartcar2026 folder or its Code folder."
   exit 1
 }
 
