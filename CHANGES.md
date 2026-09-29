@@ -1,17 +1,21 @@
-# Changes from the Original Freenove Repository
+# Change History
 
-This repository began as **Freenove's** [Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi](https://github.com/Freenove/Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi)
-and has been adapted by **AI Code Academy** for the course *"Machine Learning with
-Raspberry Pi & Smart Car."* The original Freenove project files are preserved; this
-document records what has been **added, changed, or reorganized** on top of them.
+This repository began as
+[Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi](https://github.com/Freenove/Freenove_4WD_Smart_Car_Kit_for_Raspberry_Pi)
+by Freenove and has been adapted by **AI Code Academy** for the course
+**Machine Learning with Raspberry Pi & Smart Car (Level 3)**.
 
-_Last updated: 2026-06-21_
+The original Freenove project files were modified. This document records what
+has been **added, changed, or reorganized** on top of them.
+
+_Last updated: 2026-09-22_
 
 ---
 
 ## Added
 
 ### `requirements.txt` (repo root)
+
 Python packages used by the course, installable on Windows, macOS, Linux, or the
 Raspberry Pi with `pip install -r requirements.txt`:
 
@@ -21,6 +25,7 @@ Raspberry Pi with `pip install -r requirements.txt`:
   scripts, so `pip` on a laptop won't choke on them.
 
 ### `Code/setup.py` — cross-platform laptop/desktop installer
+
 A single Python script that replaces the old per-OS `Code/setup_macos.py` and
 `Code/setup_windows.py`. Run it from the repo root with the system Python (`python Code/setup.py` on Windows,
 `python3 Code/setup.py` on macOS/Linux) and it:
@@ -36,6 +41,7 @@ a step fails. It detects a Raspberry Pi and points the user at the setup scripts
 (a `.venv` would hide the Pi's apt-installed system packages); `--pi` overrides this.
 
 ### `Code/setupPart1.sh` and `Code/setupPart2.sh`
+
 A two-stage, automated Raspberry Pi setup that replaces the manual steps. Both scripts
 auto-detect the Pi model, OS, and camera stack, then reboot at the end.
 
@@ -48,18 +54,20 @@ auto-detect the Pi model, OS, and camera stack, then reboot at the end.
   (`python3-numpy/opencv/pil/pyqt5/picamera2`).
 
 ### `Code/User/` — new folder
+
 Course lesson code, kept separate from the Freenove `Server` / `Client` / `Modules`
 files so student work never collides with the kit's source:
 
 - `car_setup.py` — helper that adds `Code/Server` and `Code/Client` to Python's
   import path. A lesson script only needs `import car_setup` at the top before
-  importing car modules (e.g. `from motor import Motor`).
+  importing car modules (e.g. `from Motor import Motor`).
 - Lesson scripts: `lesson_1_components.py` … `lesson_8_multiple_face_detection.py` and
   `lesson_11_camera_gui.py`. Lesson 6 ships two files — `lesson_6_pi_camera_stream_server.py`
   (runs on the Pi) and `lesson_6_client_video_receiver.py`.
 - `user.md` — notes for the folder.
 
 ### `Resources/` — new folder
+
 Documentation PDFs organized into one place:
 
 - `About_Battery.pdf`
@@ -70,13 +78,15 @@ Documentation PDFs organized into one place:
 ## Changed
 
 ### `README.md` — rewritten for the course
+
 Added an AI Code Academy course note, a **Computer (laptop/desktop) Setup** section for
 `Code/setup.py`, full **Raspberry Pi setup** instructions for the two `Code/setupPart`
 scripts, and a **"Where to Put Your Code"** section documenting `Code/User` and
 `car_setup.py`. The original Freenove Download / Support / Copyright / About sections are
 kept.
 
-### `Code/Client/Video.py` — face detection now runs on any platform
+### `Code/Client/video.py` — face detection now runs on any platform
+
 Removed the platform guard in `face_detect()`:
 
 ```python
@@ -92,6 +102,7 @@ lesson scripts in `Code/User` — `lesson_7_face_tracking.py`, `lesson_8_multipl
 and `lesson_11_camera_gui.py` — were written without that restriction for the same reason.)
 
 ### `Code/Client/video.py` — video frames are written atomically
+
 `face_detect()` now renders each frame to `video_tmp.jpg` and `os.replace()`s it onto
 `video.jpg` in a single step, instead of writing `video.jpg` in place. `cv2.imwrite` is
 not atomic, so the streaming thread could be caught mid-write by the GUI's display timer;
@@ -100,27 +111,31 @@ placeholder between good frames. The atomic rename guarantees the reader always 
 complete frame, removing the flicker.
 
 ### `Code/Server/servo.py` — servo commands are clamped to safe hardware ranges
+
 Servo angles are now clamped to `0..180` degrees, and converted PWM pulses are clamped
 to the standard `500..2500 us` range before being sent to the PCA9685. This keeps the
 horizontal ultrasonic servo from receiving out-of-range pulses at the far right end of
 the client control.
 
 ### `Code/Server/led.py` — LEDs work on the Raspberry Pi 5
+
 `rpi_ws281x` cannot drive the LEDs on a Pi 5 (GPIO moved to the RP1 chip), so creating
-`Led()` failed with `ws2811_init failed with code -3 (Hardware revision is not
-supported)` and then segfaulted. `led.py` now reads `/proc/device-tree/model`. On a
-Pi 5 it swaps in a small `Adafruit_NeoPixel` stand-in built on `Adafruit-Blinka-Raspberry-Pi5-Neopixel`,
-which drives the same GPIO 18 through the RP1's PIO block. On older Pis it still imports
-`rpi_ws281x`. The `Led` class API is unchanged, so lessons need no edits.
+`Led()` failed with `ws2811_init failed with code -3 (Hardware revision is not supported)`
+and then segfaulted. `led.py` now reads `/proc/device-tree/model`. On a Pi 5 it
+uses an `Adafruit_NeoPixel` stand-in built on
+`Adafruit-Blinka-Raspberry-Pi5-Neopixel`, which drives the same GPIO 18 through
+the RP1's PIO block. On older Pis it still imports `rpi_ws281x`. The `Led` class
+API is unchanged, so lessons need no edits.
+
 `setupPart2.sh` installs that driver (and `python3-rpi-lgpio`, the Pi 5-compatible
 `RPi.GPIO`) when it detects a Pi 5.
 
 ---
 
-## Removed / moved
+## Removed / Moved
 
 - **`Code/setup_macos.py` and `Code/setup_windows.py`** — the two per-OS pip installers
-  were replaced by the single cross-platform `Code/setup.py` (see *Added*).
+  were replaced by the single cross-platform `Code/setup.py` (see [Added](#added)).
 - **`Code/build.sh` and the original Freenove Pi-oriented `Code/setup.py` helper** — removed.
   The only car-specific step they performed (installing the WS281x LED driver) is now
   done inline by `setupPart2.sh`; making `python3` the default and installing
@@ -134,6 +149,8 @@ which drives the same GPIO 18 through the RP1's PIO block. On older Pis it still
 ## Preserved from Freenove
 
 The rest of the original Freenove project remains in place, including `Code/Server/`,
-`Code/Client/` (apart from `Video.py` above), `Code/Patch/`, `Datasheet/`, and
-`Picture/`. All original files stay under Freenove's
-[Creative Commons BY-NC-SA 3.0](http://creativecommons.org/licenses/by-nc-sa/3.0/) license.
+`Code/Client/` (apart from [`video.py`](Code/Client/video.py), described under
+[Changed](#changed)), `Code/Patch/`, `Datasheet/`, and `Picture/`. All original
+files stay under Freenove's
+[Creative Commons BY-NC-SA 3.0](http://creativecommons.org/licenses/by-nc-sa/3.0/)
+license.
