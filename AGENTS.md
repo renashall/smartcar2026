@@ -3,10 +3,10 @@
 Shared guidance for LLM agents (Claude, Codex, Gemini, etc.) working in this
 repository. `CLAUDE.md` is a symlink to this file.
 
-## What this repo is
+## Project Structure
 
 A fork of Freenove's **4WD Smart Car Kit for Raspberry Pi**, adapted by
-AI Code Academy for the course *"Machine Learning with Raspberry Pi & Smart Car."*
+AI Code Academy for the course **Machine Learning with Raspberry Pi & Smart Car (Level 3)**.
 The original Freenove files are preserved; course material is added on top.
 See `CHANGES.md` for the full list of additions.
 
@@ -30,7 +30,7 @@ See `CHANGES.md` for the full list of additions.
 - `requirements.txt` — laptop-installable Python deps (Pi-only libs are
   commented out so `pip` on a laptop won't choke).
 
-## How `Code/User` lessons work
+## How `Code/User` Lessons Work
 
 - Each on-Pi lesson starts with `import car_setup` BEFORE importing any car
   module. `car_setup.py` adds `Code/Server` and `Code/Client` to `sys.path`, so
@@ -51,7 +51,7 @@ See `CHANGES.md` for the full list of additions.
   - `from Ultrasonic import Ultrasonic` → `Ultrasonic().get_distance()` (cm)
   - `from Command import COMMAND` → command-name constants (`CMD_MOTOR`, `CMD_SERVO`, …)
 
-## Running lessons
+## Running Lessons
 
 - **On the Pi:** Lessons 1–5 and `lesson_6_pi_camera_stream_server.py`.
   Run LED lessons (1, 2) with **`sudo`** — `rpi_ws281x` needs root
@@ -64,7 +64,7 @@ See `CHANGES.md` for the full list of additions.
   and 5000 (commands). The video protocol is `[4-byte little-endian length]
   [JPEG bytes]`, terminated by a length of 0.
 
-## Conventions for agents
+## Conventions for Agents
 
 - Treat `Code/Server` and `Code/Client` as upstream Freenove code; prefer adding
   new work under `Code/User`. Record any deviation in `CHANGES.md`.
@@ -73,3 +73,20 @@ See `CHANGES.md` for the full list of additions.
   off-Pi after `pip install numpy opencv-python PyQt5`. The hardware lessons can
   only be `py_compile`-checked off-Pi.
 - Keep scratch output in `.tmp/` (gitignored). Clean up `__pycache__/` when done.
+
+## Git Workflow
+
+- Keep `main` as the GitHub default and release branch; do new work on
+  `development`. Stage and commit new work only on `development`, with user
+  authorization. Do not commit new work directly on `main`.
+- When the user asks to push to `main`, review the latest commit histories and
+  diff between `development` and `main`. Squash commits where useful to reduce
+  the number of commits pushed to `main`, merge `development` into `main`, sync
+  the local branches, and push `main`. Keep `development` local unless the user
+  explicitly asks to publish it.
+
+## Commit Messages
+
+- Use `<prefix>: <imperative summary>` for commits. Choose a clear prefix such
+  as `docs`, `feat`, `cleanup`, `bugfix`, `init`, `tools`, `ui`, `backend`,
+  `frontend`, `lesson`, `refactor`, or `upgrade`.
