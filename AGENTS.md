@@ -1,4 +1,4 @@
-# Agent Guide — smartcar2026
+# Agent Rules & Guidelines — smartcar2026
 
 Shared guidance for LLM agents (Claude, Codex, Gemini, etc.) working in this
 repository. `CLAUDE.md` is a symlink to this file.

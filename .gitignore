@@ -16,7 +16,6 @@ Desktop.ini
 .vscode/
 *.swp
 *.swo
-*.tmp
 *Internal_Debug
 
 # Python
@@ -39,6 +38,10 @@ dist/
 venv/
 env/
 ENV/
+
+# Agents
+.agents/
+.codex/
 .claude/
 
 # Logs and local output
@@ -47,10 +50,15 @@ logs/
 *.pid
 *.seed
 
+# Temporary files
+*.tmp
+*.temp
+.temporary/
+
 # Local environment files
 .env
 .env.*
 !.env.example
 
-# Separate project (its own git repo) - not part of this repo
+# Separate project involving the course design slides that use this code as content
 Smart-Car-Level-3-slides/
