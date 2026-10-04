@@ -8,7 +8,7 @@ by Freenove and has been adapted by **AI Code Academy** for the course
 The original Freenove project files were modified. This document records what
 has been **added, changed, or reorganized** on top of them.
 
-_Last updated: 2026-09-22_
+_Last updated: 2026-10-03_
 
 ---
 
@@ -76,6 +76,14 @@ Documentation PDFs organized into one place:
 ---
 
 ## Changed
+
+### `Code/Server/server.py` — video framing works on 64-bit Raspberry Pi OS
+
+Video frame lengths now use `struct.pack('<L', length)` to send a fixed four-byte,
+little-endian header. The previous native `L` format sent eight bytes on 64-bit
+Linux, breaking the desktop client and lesson receivers that expect four bytes.
+The format matches the existing Lesson 6 camera server and receivers, so no
+lesson files need edits. It also preserves the wire format on 32-bit Pi OS.
 
 ### `README.md` — rewritten for the course
 
