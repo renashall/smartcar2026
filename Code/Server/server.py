@@ -132,7 +132,8 @@ class Server:
                     length=len(b)
                     if length >5120000:
                         continue
-                    lengthBin = struct.pack('L', length)
+                    # Match the clients' 4-byte little-endian header on 32/64-bit Pi OS.
+                    lengthBin = struct.pack('<L', length)
                     self.connection.write(lengthBin)
                     self.connection.write(b)
                 except Exception as e:
