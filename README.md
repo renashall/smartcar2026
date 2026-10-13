@@ -83,15 +83,20 @@ These software tools may or may not be needed, depending on how you prepare the 
 
 Download the repository on each computer or Raspberry Pi where you plan to run the lessons. Use Git for the steps below, or download a ZIP if you do not want to use Git.
 
+The `main` branch contains the base car code, shared `car_setup.py` helper, and
+folder notes. The `development` branch also contains the numbered lesson scripts.
+The commands below download `development` so the example lessons are available.
+Use `--branch main` instead if you only want the base code.
+
 1. Check that Git is available using the instructions in **Requirements - Software** above.
 2. Open **PowerShell** on Windows, or **Terminal** on macOS, Linux, or Raspberry Pi OS. Go to the folder where you want to download the project.
 3. Run:
 
    ```sh
-   git clone https://github.com/renashall/smartcar2026.git
+   git clone --branch development https://github.com/renashall/smartcar2026.git
    ```
 
-Alternatively, open the [repository on GitHub](https://github.com/renashall/smartcar2026), select **Code**, then **Download ZIP**, and extract it. The extracted folder may have a different name; use its actual name in the commands below.
+Alternatively, open the [repository on GitHub](https://github.com/renashall/smartcar2026), select the **development** branch for the example lessons, select **Code**, then **Download ZIP**, and extract it. The extracted folder may have a different name; use its actual name in the commands below.
 
 ### Raspberry Pi Setup
 
@@ -124,7 +129,7 @@ Run these steps on the Pi after it boots. Use the Pi's Terminal directly, or con
 2. Clone this repository onto the Pi from its Terminal:
 
    ```sh
-   git clone https://github.com/renashall/smartcar2026.git
+   git clone --branch development https://github.com/renashall/smartcar2026.git
    ```
 
 3. Enter the repository's `Code` folder and make the setup scripts executable:
@@ -204,7 +209,7 @@ Run these steps on the Pi after it boots. Use the Pi's Terminal directly, or con
 
 ### Creating New Code & Testing
 
-Keep your course and experiment scripts in `Code/User` so they stay separate from the Freenove `Code/Server` and `Code/Client` files. The folder also contains example lessons, the shared `car_setup.py` helper, and notes.
+Keep your course and experiment scripts in `Code/User` so they stay separate from the Freenove `Code/Server` and `Code/Client` files. Both branches include the shared `car_setup.py` helper and notes. The numbered example lessons are included on `development`.
 
 1. Create your script in:
 
