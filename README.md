@@ -1,4 +1,4 @@
-# Machine Learning with Raspberry Pi & Smart Car (Level 3)
+# Machine Learning with Raspberry Pi & Smart Car (Level 3) - Code
 
 This repository was created by **AI Code Academy** for the **Machine Learning with Raspberry Pi & Smart Car (Level 3)** course. It contains the course code files, resources, setup scripts and instructions, plus examples and projects for each lesson.
 
