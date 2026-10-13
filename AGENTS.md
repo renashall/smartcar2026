@@ -18,8 +18,9 @@ See `CHANGES.md` for the full list of additions.
 - `Code/Client/` — Freenove desktop client (PyQt5). Preserved Freenove code.
 - `Code/User/` — **course lesson scripts** (the primary place for new work).
   Keep student/course code here, separate from the Freenove source. This folder
-  holds the lesson `.py` files alongside the shared `car_setup.py` helper and
-  `USER.md` notes.
+  holds development-only numbered `lesson_*.py` examples alongside the shared
+  `car_setup.py` helper and lowercase `user.md` notes, which remain on both
+  branches.
 - `Application/`, `Code/Patch/`, `Datasheet/`, `Resources/` — original app
   files, assets, datasheets, and patches.
 - `Code/setupPart1.sh` / `Code/setupPart2.sh` — two-stage Raspberry Pi setup
@@ -79,11 +80,17 @@ See `CHANGES.md` for the full list of additions.
 - Keep `main` as the GitHub default and release branch; do new work on
   `development`. Stage and commit new work only on `development`, with user
   authorization. Do not commit new work directly on `main`.
-- When the user asks to push to `main`, review the latest commit histories and
-  diff between `development` and `main`. Squash commits where useful to reduce
-  the number of commits pushed to `main`, merge `development` into `main`, sync
-  the local branches, and push `main`. Keep `development` local unless the user
-  explicitly asks to publish it.
+- `main` omits the numbered `Code/User/lesson_*.py` examples and root
+  `AGENTS.md`/`CLAUDE.md`; `development` retains them. Both branches retain
+  the shared `Code/User/car_setup.py` and lowercase `Code/User/user.md`.
+- When promoting to `main`, review the latest commit histories and diff between
+  `development` and `main`, prepare the release-exclusions commit on
+  `development`, then fast-forward `main` to it through the **Push To Main**
+  task or script. Restore the development-only files on `development` in a
+  separate commit. Preserve development-only files in future promotions; do
+  not synchronize branch tips/content identically or squash user-preserved
+  history without explicit authorization. Keep `development` local unless the
+  user explicitly asks to publish it.
 
 ## Commit Messages
 

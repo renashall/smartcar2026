@@ -2,6 +2,14 @@
 
 This folder is for AI Code Academy lesson files and your own smart car programs.
 
+The bundled `lesson_*.py` examples are available on the `development` branch.
+The `main` branch keeps `car_setup.py` and these notes for your own programs.
+To use the examples in an existing clone, switch branches from the repository root:
+
+```sh
+git switch development
+```
+
 Use `Code/User` when you are writing new code for the course, testing an idea, or saving a finished lesson script. Keeping your files here prevents course work from being mixed into the original Freenove `Code/Server`, `Code/Client`, and `Code/Modules` folders.
 
 ## Using `car_setup.py`

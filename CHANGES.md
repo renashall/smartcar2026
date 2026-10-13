@@ -8,7 +8,7 @@ by Freenove and has been adapted by **AI Code Academy** for the course
 The original Freenove project files were modified. This document records what
 has been **added, changed, or reorganized** on top of them.
 
-_Last updated: 2026-10-03_
+_Last updated: 2026-10-13_
 
 ---
 
@@ -76,6 +76,14 @@ Documentation PDFs organized into one place:
 ---
 
 ## Changed
+
+### Branch contents
+
+The current `main` branch omits the numbered `Code/User/lesson_*.py` examples
+and the root `AGENTS.md` / `CLAUDE.md` agent guidance. The `development` branch
+retains all ten lesson scripts and both guidance files. Shared car code,
+`Code/User/car_setup.py`, and `Code/User/user.md` remain on both branches.
+Existing history is preserved; earlier `main` commits still contain these files.
 
 ### `Code/Server/server.py` — video framing works on 64-bit Raspberry Pi OS
 
