@@ -18,9 +18,8 @@ See `CHANGES.md` for the full list of additions.
 - `Code/Client/` — Freenove desktop client (PyQt5). Preserved Freenove code.
 - `Code/User/` — **course lesson scripts** (the primary place for new work).
   Keep student/course code here, separate from the Freenove source. This folder
-  holds development-only numbered `lesson_*.py` examples alongside the shared
-  `car_setup.py` helper and lowercase `user.md` notes, which remain on both
-  branches.
+  holds the numbered `lesson_*.py` files alongside the shared `car_setup.py`
+  helper and `user.md` notes.
 - `Application/`, `Code/Patch/`, `Datasheet/`, `Resources/` — original app
   files, assets, datasheets, and patches.
 - `Code/setupPart1.sh` / `Code/setupPart2.sh` — two-stage Raspberry Pi setup
@@ -80,17 +79,23 @@ See `CHANGES.md` for the full list of additions.
 - Keep `main` as the GitHub default and release branch; do new work on
   `development`. Stage and commit new work only on `development`, with user
   authorization. Do not commit new work directly on `main`.
-- `main` omits the numbered `Code/User/lesson_*.py` examples and root
-  `AGENTS.md`/`CLAUDE.md`; `development` retains them. Both branches retain
-  the shared `Code/User/car_setup.py` and lowercase `Code/User/user.md`.
-- When promoting to `main`, review the latest commit histories and diff between
-  `development` and `main`, prepare the release-exclusions commit on
-  `development`, then fast-forward `main` to it through the **Push To Main**
-  task or script. Restore the development-only files on `development` in a
-  separate commit. Preserve development-only files in future promotions; do
-  not synchronize branch tips/content identically or squash user-preserved
-  history without explicit authorization. Keep `development` local unless the
-  user explicitly asks to publish it.
+- `main` and `development` hold the same files, including the
+  `Code/User/lesson_*.py` examples and `AGENTS.md`/`CLAUDE.md`. Do not add
+  branch-specific exclusion or restore commits.
+- When the user asks to push to `main`, review the commits on `development`
+  that `main` lacks, then fast-forward `main` to `development` and push both
+  branches so their tips match:
+
+  ```sh
+  git switch main
+  git merge --ff-only development
+  git push origin main development
+  git switch development
+  ```
+
+  If the fast-forward fails because `main` has commits `development` lacks
+  (for example, edits made on GitHub), merge `main` into `development` first.
+  Do not squash or rewrite history without explicit authorization.
 
 ## Commit Messages
 
