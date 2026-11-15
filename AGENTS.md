@@ -19,7 +19,7 @@ See `CHANGES.md` for the full list of additions.
 - `Code/User/` — **course lesson scripts** (the primary place for new work).
   Keep student/course code here, separate from the Freenove source. This folder
   holds the numbered `lesson_*.py` files alongside the shared `car_setup.py`
-  helper and `user.md` notes.
+  helper and `USER.md` notes.
 - `Application/`, `Code/Patch/`, `Datasheet/`, `Resources/` — original app
   files, assets, datasheets, and patches.
 - `Code/setupPart1.sh` / `Code/setupPart2.sh` — two-stage Raspberry Pi setup

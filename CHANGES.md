@@ -64,7 +64,7 @@ files so student work never collides with the kit's source:
 - Lesson scripts: `lesson_1_components.py` … `lesson_8_multiple_face_detection.py` and
   `lesson_11_camera_gui.py`. Lesson 6 ships two files — `lesson_6_pi_camera_stream_server.py`
   (runs on the Pi) and `lesson_6_client_video_receiver.py`.
-- `user.md` — notes for the folder.
+- `USER.md` — notes for the folder.
 
 ### `Resources/` — new folder
 
